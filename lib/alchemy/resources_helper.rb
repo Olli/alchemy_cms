@@ -10,7 +10,7 @@ module Alchemy
     #
 
     def resource_window_size
-      @resource_window_size ||= "420x#{100 + resource_handler.attributes.length * 40}"
+      @resource_window_size ||= "480x#{100 + resource_handler.attributes.length * 40}"
     end
 
     def resource_instance_variable
@@ -87,6 +87,8 @@ module Alchemy
           options[:time_format] || :"alchemy.time"
         end
         value = l(attribute_value, format: localization_format)
+      elsif attribute[:type] == :boolean
+        value = attribute_value ? '<alchemy-icon name="check"></alchemy-icon>'.html_safe : nil
       else
         value = attribute_value
       end
@@ -123,42 +125,6 @@ module Alchemy
     # Returns an array of all resource_relations names
     def resource_relations_names
       resource_handler.resource_relations.collect { |_k, v| v[:name].to_sym }
-    end
-
-    # Returns the attribute's column for sorting
-    #
-    # If the attribute contains a resource_relation, then the table and column for related model will be returned.
-    #
-    def sortable_resource_header_column(attribute)
-      if (relation = attribute[:relation])
-        "#{relation[:model_association].name}_#{relation[:attr_method]}"
-      else
-        attribute[:name]
-      end
-    end
-
-    # Renders the row for a resource record in the resources table.
-    #
-    # This helper has a nice fallback. If you create a partial for your record then this partial will be rendered.
-    #
-    # Otherwise the default +app/views/alchemy/admin/resources/_resource.html.erb+ partial gets rendered.
-    #
-    # == Example
-    #
-    # For a resource named +Comment+ you can create a partial named +_comment.html.erb+
-    #
-    #   # app/views/admin/comments/_comment.html.erb
-    #   <tr>
-    #     <td><%= comment.title %></td>
-    #     <td><%= comment.body %></td>
-    #   </tr>
-    #
-    # NOTE: Alchemy gives you a local variable named like your resource
-    #
-    def render_resources(icon: nil)
-      render partial: resource_name, collection: resources_instance_variable, locals: {icon: icon}
-    rescue ActionView::MissingTemplate
-      render partial: "resource", collection: resources_instance_variable, locals: {icon: icon}
     end
 
     def resource_has_tags

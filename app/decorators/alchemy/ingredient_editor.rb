@@ -36,7 +36,7 @@ module Alchemy
         "ingredient-editor",
         partial_name,
         deprecated? ? "deprecated" : nil,
-        (respond_to?(:level_options) && level_options.many?) ? "with-level-select" : nil,
+        (respond_to?(:level_options) && level_options.any?) ? "with-level-select" : nil,
         (respond_to?(:size_options) && size_options.many?) ? "with-size-select" : nil,
         settings[:linkable] ? "linkable" : nil,
         settings[:anchor] ? "with-anchor" : nil
@@ -151,6 +151,23 @@ module Alchemy
           default: Alchemy.t(:ingredient_deprecated)
         )
       end
+    end
+
+    def validations
+      definition.fetch(:validate, [])
+    end
+
+    def format_validation
+      validations.select { _1.is_a?(Hash) }.find { _1[:format] }&.fetch(:format)
+    end
+
+    def length_validation
+      validations.select { _1.is_a?(Hash) }.find { _1[:length] }&.fetch(:length)
+    end
+
+    def presence_validation?
+      validations.include?("presence") ||
+        validations.any? { _1.is_a?(Hash) && _1[:presence] == true }
     end
 
     private

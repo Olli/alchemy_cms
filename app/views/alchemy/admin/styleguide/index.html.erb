@@ -2,12 +2,8 @@
   <%= "Styleguide" %>
 <% end %>
 
-<% content_for :javascript_includes do %>
-  <meta name="turbo-cache-control" content="no-cache">
-<% end %>
-
 <% content_for(:toolbar) do %>
-  <%= toolbar_button(
+  <%= render Alchemy::Admin::ToolbarButton.new(
     icon: :info,
     label: 'Info',
     url: alchemy.dashboard_info_path,

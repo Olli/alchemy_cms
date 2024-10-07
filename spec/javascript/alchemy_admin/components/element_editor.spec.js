@@ -251,12 +251,17 @@ describe("alchemy-element-editor", () => {
     })
   })
 
-  describe("on ajax:success", () => {
+  describe("on ajax:complete", () => {
     describe("if event was triggered on this element", () => {
       it("sets element to saved state", () => {
-        const event = new CustomEvent("ajax:success", {
+        const event = new CustomEvent("ajax:complete", {
           bubbles: true,
-          detail: [{ ingredientAnchors: [] }]
+          detail: [
+            {
+              status: 200,
+              responseText: JSON.stringify({ ingredientAnchors: [] })
+            }
+          ]
         })
         editor.dirty = true
         editor.body.dispatchEvent(event)
@@ -287,9 +292,17 @@ describe("alchemy-element-editor", () => {
             </div>
           </alchemy-element-editor>
         `)
-        const event = new CustomEvent("ajax:success", {
+        const event = new CustomEvent("ajax:complete", {
           bubbles: true,
-          detail: [{ previewText: "Child Element", ingredientAnchors: [] }]
+          detail: [
+            {
+              status: 200,
+              responseText: JSON.stringify({
+                previewText: "Child Element",
+                ingredientAnchors: []
+              })
+            }
+          ]
         })
         const childElement = editor.querySelector("#element_789")
         childElement.dirty = true
@@ -398,20 +411,23 @@ describe("alchemy-element-editor", () => {
             </div>
             <form class="element-body">
               <div class="element_errors">
-                <ul class="error-messages">
-                  <li>Please enter a value</li>
-                </ul>
+                <p>Please check fields below</p>
               </div>
               <div class="element-ingredient-editors">
-                <div class="ingredient-editor validation_failed" data-ingredient-id="666"></div>
+                <div class="ingredient-editor validation_failed" data-ingredient-id="666">
+                  <small class="error">Please enter a value</small>
+                </div>
               </div>
             </form>
             <div class="element-footer"></div>
           </alchemy-element-editor>
         `)
         const data = {
-          notice: "Element saved",
-          ingredientAnchors: [{ ingredientId: 55, active: true }]
+          status: 200,
+          responseText: JSON.stringify({
+            notice: "Element saved",
+            ingredientAnchors: [{ ingredientId: 55, active: true }]
+          })
         }
         editor.dirty = true
         editor.onSaveElement(data)
@@ -422,7 +438,8 @@ describe("alchemy-element-editor", () => {
       })
 
       it("resets validation errors", () => {
-        expect(editor.errorsDisplay.innerHTML).toBe("")
+        const errorsDisplay = editor.querySelector("small.error")
+        expect(errorsDisplay).toBe(null)
       })
 
       it("hides element errors", () => {
@@ -453,7 +470,7 @@ describe("alchemy-element-editor", () => {
           >
             <form class="element-body">
               <div class="element_errors">
-                <ul class="error-messages"></ul>
+                <p>Please check fields below</p>
               </div>
               <div class="element-ingredient-editors">
                 <div class="ingredient-editor" data-ingredient-id="666"></div>
@@ -463,17 +480,20 @@ describe("alchemy-element-editor", () => {
           </alchemy-element-editor>
         `)
         const data = {
-          warning: "Something is not right",
-          errors: ["Please enter a value"],
-          ingredientsWithErrors: [666]
+          status: 422,
+          responseText: JSON.stringify({
+            warning: "Something is not right",
+            ingredientsWithErrors: [
+              { id: 666, errorMessage: "Please enter a value" }
+            ]
+          })
         }
         editor.onSaveElement(data)
       })
 
       it("displays errors", () => {
-        expect(editor.errorsDisplay.querySelector("li").textContent).toBe(
-          "Please enter a value"
-        )
+        const errorsDisplay = editor.querySelector("small.error")
+        expect(errorsDisplay.textContent).toBe("Please enter a value")
       })
 
       it("marks ingredients as invalid", () => {
@@ -569,6 +589,7 @@ describe("alchemy-element-editor", () => {
       editor = getComponent(`
         <alchemy-element-editor id="element_123" class="dirty">
           <form class="element-body">
+            <div class="element_errors"></div>
             <div class="element-ingredient-editors">
               <div class="ingredient-editor dirty"></div>
             </div>
@@ -969,12 +990,6 @@ describe("alchemy-element-editor", () => {
         </alchemy-element-editor>
       `)
       expect(editor.toggleIcon).toBeUndefined()
-    })
-  })
-
-  describe("errorsDisplay", () => {
-    it("returns errors display element", () => {
-      expect(editor.errorsDisplay).toBeInstanceOf(HTMLElement)
     })
   })
 

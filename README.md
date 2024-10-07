@@ -17,7 +17,7 @@ Alchemy is an open source CMS engine written in Ruby on Rails.
 
 Read more about Alchemy on the [website](https://alchemy-cms.com) and in the [guidelines](https://guides.alchemy-cms.com).
 
-**CAUTION: This main branch is a development branch that *can* contain bugs. For productive environments you should use the [current Ruby gem version](https://rubygems.org/gems/alchemy_cms), or the [latest stable branch (7.0-stable)](https://github.com/AlchemyCMS/alchemy_cms/tree/7.0-stable).**
+**CAUTION: This main branch is a development branch that *can* contain bugs. For productive environments you should use the [current Ruby gem version](https://rubygems.org/gems/alchemy_cms), or the [latest stable branch (7.3-stable)](https://github.com/AlchemyCMS/alchemy_cms/tree/7.3-stable).**
 
 ## 🏆 Main sponsor
 
@@ -43,14 +43,14 @@ Read more about Alchemy on the [website](https://alchemy-cms.com) and in the [gu
 
 ## 🎮 Demo
 
-Visit the existing demo at https://alchemy-demo.fly.dev/
+Visit the existing demo at https://demo.alchemy-cms.com/
 
 - Login: `demo`
 - Password: `demo123`
 
 ## 🚂 Rails Version
 
-**This version of AlchemyCMS runs with Rails 7.0 and 7.1**
+**This version of AlchemyCMS runs with >= Rails 7.0**
 
 * For a Rails 6.1 compatible version use the [`7.0-stable` branch](https://github.com/AlchemyCMS/alchemy_cms/tree/7.0-stable).
 * For a Rails 6.0 compatible version use the [`6.1-stable` branch](https://github.com/AlchemyCMS/alchemy_cms/tree/6.1-stable).
@@ -66,7 +66,9 @@ Visit the existing demo at https://alchemy-demo.fly.dev/
 
 ## 💎 Ruby Version
 
-Alchemy runs with Ruby >= 2.5.0.
+Alchemy runs with Ruby >= 3.1.0.
+
+For a Ruby 3.0 compatible version use the [`7.2-stable` branch](https://github.com/AlchemyCMS/alchemy_cms/tree/7.2-stable).
 
 For a Ruby 2.4 compatible version use the [`5.2-stable` branch](https://github.com/AlchemyCMS/alchemy_cms/tree/5.2-stable).
 
@@ -370,7 +372,7 @@ $ bundle exec rake release
 * Read the guidelines: https://guides.alchemy-cms.com.
 * Read the documentation: https://www.rubydoc.info/github/AlchemyCMS/alchemy_cms
 * If you think you found a bug please use the [issue tracker on Github](https://github.com/AlchemyCMS/alchemy_cms/issues).
-* For questions about general usage please use [Stack Overflow](http://stackoverflow.com/questions/tagged/alchemy-cms) or the [Slack](https://slackin.alchemy-cms.com).
+* For questions about general usage please use [Stack Overflow](http://stackoverflow.com/questions/tagged/alchemy-cms) or the [Slack](https://join.slack.com/t/alchemy-cms/shared_invite/zt-2ir32b4ph-L3EVS0FiMiWKx7omNNbeyw).
 * New features should be discussed on our [Trello Board](https://trello.com/alchemycms).
 
 **PLEASE** don't use the Github issues for feature requests. If you want to contribute to Alchemy please [read the contribution guidelines](CONTRIBUTING.md) before doing so.
@@ -383,14 +385,19 @@ $ bundle exec rake release
 * API Documentation: <https://www.rubydoc.info/github/AlchemyCMS/alchemy_cms>
 * Issue-Tracker: <https://github.com/AlchemyCMS/alchemy_cms/issues>
 * Sourcecode: <https://github.com/AlchemyCMS/alchemy_cms>
-* Slack: <https://slackin.alchemy-cms.com>
-* Twitter: <https://twitter.com/alchemy_cms>
+* Slack: [https://alchemy-cms.slack.com](https://join.slack.com/t/alchemy-cms/shared_invite/zt-2ir32b4ph-L3EVS0FiMiWKx7omNNbeyw)
+* Mastodon: <https://ruby.social/@alchemy_cms>
 
 
 ## ✍️ Authors
 
 * Thomas von Deyen: <https://github.com/tvdeyen>
+* Martin Meyerhoff: <https://github.com/mamhoff>
+* Sascha Karnatz: <https://github.com/sascha-karnatz>
 * Robin Böning: <https://github.com/robinboening>
+
+### Alumni
+
 * Marc Schettke: <https://github.com/masche842>
 * Hendrik Mans: <https://github.com/hmans>
 * Carsten Fregin: <https://github.com/cfregin>

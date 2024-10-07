@@ -66,6 +66,7 @@ module Alchemy
         MessagesMailer.contact_form_mail(@message, mail_to, mail_from, subject).deliver
         redirect_to_success_page
       else
+        Current.page = @page
         render template: "alchemy/pages/show"
       end
     end
@@ -97,7 +98,7 @@ module Alchemy
       else
         Language.current_root_page.urlname
       end
-      redirect_to show_page_path(
+      redirect_to alchemy.show_page_path(
         urlname: urlname,
         locale: prefix_locale? ? Current.language.code : nil
       )

@@ -141,23 +141,28 @@ module Alchemy
         resource_filters.map(&:values).flatten
       end
 
-      # Returns a translated +flash[:notice]+.
-      # The key should look like "Modelname successfully created|updated|destroyed."
-      def flash_notice_for_resource_action(action = params[:action])
+      # Returns a translated +flash[:notice]+ for current controller action.
+      def flash_notice_for_resource_action(action = action_name)
         return if resource_instance_variable.errors.any?
 
+        flash[:notice] = message_for_resource_action(action)
+      end
+
+      # Returns a translated message for a +flash[:notice]+.
+      # The key should look like "Modelname successfully created|updated|destroyed."
+      def message_for_resource_action(action = action_name)
         case action.to_sym
         when :create
-          verb = "created"
+          verb = Alchemy.t("created", scope: "resources.actions")
         when :update
-          verb = "updated"
+          verb = Alchemy.t("updated", scope: "resources.actions")
         when :destroy
-          verb = "removed"
+          verb = Alchemy.t("removed", scope: "resources.actions")
         end
-        flash[:notice] = Alchemy.t(
-          "#{resource_handler.resource_name.classify} successfully #{verb}",
-          default: Alchemy.t("Successfully #{verb}")
-        )
+        Alchemy.t("%{resource_name} successfully %{action}",
+          resource_name: resource_handler.model.model_name.human,
+          action: verb,
+          default: Alchemy.t("Successfully #{verb}"))
       end
 
       def is_alchemy_module?
@@ -165,7 +170,7 @@ module Alchemy
       end
 
       def alchemy_module
-        @alchemy_module ||= module_definition_for(controller: params[:controller], action: "index")
+        @alchemy_module ||= module_definition_for(controller: controller_path, action: "index")
       end
 
       def load_resource
@@ -195,10 +200,7 @@ module Alchemy
       def common_search_filter_includes
         search_filters = [
           {
-            q: [
-              resource_handler.search_field_name,
-              :s
-            ]
+            q: [:s] + permitted_ransack_search_fields
           },
           :tagged_with,
           :page,
@@ -212,6 +214,12 @@ module Alchemy
         end
 
         search_filters
+      end
+
+      def permitted_ransack_search_fields
+        [
+          resource_handler.search_field_name
+        ]
       end
 
       def items_per_page

@@ -8,17 +8,56 @@ on:
   push:
     branches:
       - main
+      - 7.3-stable
+      - 7.2-stable
       - 7.1-stable
       - 7.0-stable
-      - 6.1-stable
   pull_request:
 
 jobs:
-  Build:
-    uses: ./.github/workflows/build.yml
+  check_bun_lock:
+    runs-on: ubuntu-latest
+    name: Check bun.lockdb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history
+      - name: Get changed files
+        id: changed-bun-lock
+        uses: tj-actions/changed-files@v41
+        with:
+          files: bun.lockdb
+    outputs:
+      bun_lock_changed: ${{ steps.changed-bun-lock.outputs.any_changed }}
+
+  build_javascript:
+    runs-on: ubuntu-latest
+    name: Build JS packages
+    needs: check_bun_lock
+    if: needs.check_bun_lock.outputs.bun_lock_changed == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Restore node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('bun.lockdb') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules
+      - name: Install dependencies
+        run: bun install
+      - name: bun build
+        run: bun run --bun build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: javascript-bundles
+          path: vendor/javascript
 
   RSpec:
-    needs: Build
+    needs: [check_bun_lock, build_javascript]
+    if: ${{ success('check_bun_lock') && !failure('build_javascript') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -26,13 +65,13 @@ jobs:
         rails:
           - "7.0"
           - "7.1"
+          - "7.2"
         ruby:
-          - "3.0"
           - "3.1"
           - "3.2"
           - "3.3"
         database:
-          - mysql
+          - sqlite
           - postgresql
           - mariadb
     env:
@@ -52,15 +91,6 @@ jobs:
           POSTGRES_DB: alchemy_cms_dummy_test
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-      mysql:
-        image: mysql:latest
-        ports: ["3306:3306"]
-        env:
-          MYSQL_USER: alchemy_user
-          MYSQL_PASSWORD: password
-          MYSQL_DATABASE: alchemy_cms_dummy_test
-          MYSQL_ROOT_PASSWORD: password
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
       mariadb:
         image: mariadb:latest
         ports: ["3307:3306"]
@@ -77,6 +107,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+          rubygems: "latest"
       - name: Restore apt cache
         id: apt-cache
         uses: actions/cache@v4
@@ -92,13 +123,18 @@ jobs:
           sudo apt update -qq
           sudo apt install -qq --fix-missing libpq-dev -o dir::cache::archives="/home/runner/apt/cache"
           sudo chown -R runner /home/runner/apt/cache
-      - name: Install MySQL headers
-        if: matrix.database == 'mysql' || matrix.database == 'mariadb'
+      - name: Install MariaDB headers
+        if: matrix.database == 'mariadb'
         run: |
           mkdir -p /home/runner/apt/cache
           sudo apt update -qq
           sudo apt install -qq --fix-missing libmysqlclient-dev -o dir::cache::archives="/home/runner/apt/cache"
           sudo chown -R runner /home/runner/apt/cache
+      - uses: actions/download-artifact@v4
+        if: needs.check_bun_lock.outputs.bun_lock_changed == 'true'
+        with:
+          name: javascript-bundles
+          path: vendor/javascript
       - name: Prepare database
         run: |
           bundle exec rake alchemy:spec:prepare
@@ -117,20 +153,54 @@ jobs:
           name: Screenshots
           path: spec/dummy/tmp/screenshots
 
+  PushJavascript:
+    runs-on: ubuntu-latest
+    needs: [check_bun_lock, RSpec]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of our personal access token.
+          fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+      - uses: actions/download-artifact@v4
+        if: needs.check_bun_lock.outputs.bun_lock_changed == 'true'
+        with:
+          name: javascript-bundles
+          path: vendor/javascript
+      - name: Check git status
+        id: git-status
+        run: git diff --quiet vendor/javascript || echo "changed=true" >> $GITHUB_OUTPUT
+      - name: git commit
+        if: steps.git-status.outputs.changed == 'true'
+        run: |
+          git config --local user.name 'AlchemyCMS - CI Bot'
+          git config --local user.email 'alchemy@blish.cloud'
+          git add vendor/javascript
+          git commit -m "Update JS packages" -m "Rebuilt packages after updating dependencies." -m "[skip ci]"
+      - name: Push changes
+        if: steps.git-status.outputs.changed == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.ALCHEMY_CI_BOT_ACCESS_TOKEN }}
+          branch: ${{ github.head_ref }}
+
   Jest:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: test
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
       - name: Restore node modules cache
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('./package.json') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockdb') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
-      - name: Install yarn
-        run: yarn install
+            ${{ runner.os }}-bun-
+      - name: Install dependencies
+        run: bun install
       - name: Run jest
-        run: yarn jest --verbose
+        run: bun run jest --verbose

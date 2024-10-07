@@ -11,11 +11,33 @@ export default [
     context: "window"
   },
   {
+    input: "node_modules/cropperjs/dist/cropper.esm.js",
+    output: {
+      file: "vendor/javascript/cropperjs.min.js"
+    },
+    plugins: [terser()],
+    context: "window"
+  },
+  {
     input: "node_modules/flatpickr/dist/esm/index.js",
     output: {
       file: "vendor/javascript/flatpickr.min.js"
     },
     plugins: [resolve(), terser()],
+    context: "window"
+  },
+  {
+    input: "node_modules/handlebars/dist/handlebars.min.js",
+    output: {
+      file: "vendor/javascript/handlebars.min.js"
+    },
+    context: "window"
+  },
+  {
+    input: "node_modules/jquery/dist/jquery.min.js",
+    output: {
+      file: "vendor/javascript/jquery.min.js"
+    },
     context: "window"
   },
   {
@@ -32,6 +54,13 @@ export default [
       file: "vendor/javascript/sortable.min.js"
     },
     plugins: [terser()]
+  },
+  {
+    input: "node_modules/select2/select2.min.js",
+    output: {
+      file: "vendor/javascript/select2.min.js"
+    },
+    context: "window"
   },
   {
     input: "node_modules/@ungap/custom-elements/min.js",
@@ -60,6 +89,20 @@ export default [
       name: "tinymce",
       format: "esm"
     },
-    plugins: [resolve(), commonjs(), terser()]
+    plugins: [
+      resolve({
+        modulePaths: ["app/javascript"]
+      }),
+      commonjs(),
+      terser()
+    ]
+  },
+  {
+    input: "app/javascript/preview.js",
+    output: {
+      file: "app/assets/builds/alchemy/preview.min.js"
+    },
+    context: "window",
+    plugins: [terser()]
   }
 ]

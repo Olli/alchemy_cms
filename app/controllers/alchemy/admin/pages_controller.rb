@@ -29,7 +29,7 @@ module Alchemy
         unless: -> { @page_root },
         only: [:index]
 
-      before_action :set_view, only: [:index]
+      before_action :set_view, only: [:index, :update]
 
       before_action :set_page_version, only: [:show, :edit]
 
@@ -131,11 +131,15 @@ module Alchemy
           @notice = Alchemy.t("Page saved", name: @page.name)
           @while_page_edit = request.referer.include?("edit")
 
+          if @view == "list"
+            flash[:notice] = @notice
+          end
+
           unless @while_page_edit
             @tree = serialized_page_tree
           end
         else
-          render :configure
+          render :configure, status: :unprocessable_entity
         end
       end
 

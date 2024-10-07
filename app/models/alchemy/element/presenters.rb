@@ -78,12 +78,6 @@ module Alchemy
         "#{display_name}: #{preview_text(maxlength)}"
       end
 
-      # Returns a dom id used for elements html id tag.
-      #
-      def dom_id
-        self.class.dom_id_class.new(self).call
-      end
-
       # The ingredient that's used for element's preview text.
       #
       # It tries to find one of element's ingredients that is defined +as_element_title+.

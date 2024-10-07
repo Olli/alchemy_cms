@@ -1,0 +1,100 @@
+#toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  z-index: 10;
+  @extend %gradiated-toolbar;
+  margin-right: 0px;
+  border-bottom: $default-border;
+  position: relative;
+
+  .toolbar_button {
+    form {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+
+  div p {
+    float: right;
+    margin: 3px var(--spacing-1) 0 0;
+    padding: 0;
+  }
+}
+
+.toolbar_buttons {
+  display: flex;
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+
+  @media screen and (min-width: $medium-screen-break-point) {
+    overflow: visible;
+  }
+
+  &.right {
+    flex-grow: 0;
+    padding: var(--spacing-2) 0;
+
+    .toolbar_button {
+      &:last-child {
+        margin-right: var(--spacing-1);
+      }
+    }
+  }
+
+  .icon_button {
+    .icon {
+      width: var(--icon-size-xl);
+      height: var(--icon-size-xl);
+    }
+  }
+
+  .toolbar_button {
+    margin: 0 var(--spacing-2);
+
+    &:first-child {
+      margin-left: var(--spacing-1);
+
+      select,
+      .alchemy_selectbox {
+        margin-left: var(--spacing-2);
+      }
+    }
+  }
+}
+
+.toolbar_spacer {
+  display: inline-block;
+  vertical-align: middle;
+  width: 0px;
+  height: 29px;
+  border-right-style: solid;
+  border-right-width: 1px;
+  border-right-color: $default-border-color;
+  margin-right: var(--spacing-1);
+  margin-left: var(--spacing-1);
+}
+
+#overlay_toolbar {
+  @extend %gradiated-toolbar;
+  border-bottom: $default-border;
+}
+
+.button_group {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 var(--spacing-2);
+
+  &:hover label {
+    display: block;
+  }
+
+  .toolbar_button {
+    margin: 0;
+  }
+}

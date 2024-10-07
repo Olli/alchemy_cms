@@ -41,9 +41,22 @@ module Alchemy
       end
 
       context "with missing partial" do
-        it "returns empty string and logges warning" do
-          expect(helper).to receive(:current_alchemy_site).twice.and_return(default_site)
-          expect(helper.render_site_layout).to eq("")
+        context "in production environment" do
+          before { allow(Rails.application.config).to receive(:consider_all_requests_local?).and_return(false) }
+
+          it "returns empty string and logges warning" do
+            expect(helper).to receive(:current_alchemy_site).twice.and_return(default_site)
+            expect(helper.render_site_layout).to eq("")
+          end
+        end
+
+        context "in dev or test environment" do
+          before { allow(Rails.application.config).to receive(:consider_all_requests_local?).and_return(true) }
+
+          it "raises missing template error" do
+            expect(helper).to receive(:current_alchemy_site).twice.and_return(default_site)
+            expect { helper.render_site_layout }.to raise_error(ActionView::MissingTemplate)
+          end
         end
       end
     end
@@ -66,7 +79,17 @@ module Alchemy
         context "but the template does not exist" do
           let(:menu_type) { "unknown" }
 
-          it { is_expected.to be_nil }
+          context "in production environment" do
+            before { allow(Rails.application.config).to receive(:consider_all_requests_local?).and_return(false) }
+
+            it { is_expected.to eq("") }
+          end
+
+          context "in dev or test environment" do
+            before { allow(Rails.application.config).to receive(:consider_all_requests_local?).and_return(true) }
+
+            it { expect { subject }.to raise_error(ActionView::MissingTemplate) }
+          end
         end
       end
 
@@ -268,6 +291,45 @@ module Alchemy
               end
             end
           end
+        end
+      end
+    end
+
+    describe "#page_title" do
+      let(:response) { double("response", status: 200) }
+
+      before do
+        allow(helper).to receive(:response) { response }
+        @page = public_page
+      end
+
+      subject { helper.page_title }
+
+      context "when current page has a title set" do
+        before { public_page.title = "My Public Page" }
+
+        it { is_expected.to eq "My Public Page" }
+      end
+
+      context "when current page has no title set" do
+        before do
+          language_root.title = "Title from language root"
+        end
+
+        context "when current page is the language root page" do
+          before { @page = language_root }
+
+          it { is_expected.to eq "Title from language root" }
+        end
+      end
+
+      context "when response status is not 200" do
+        let(:response) { double("response", status: 404) }
+
+        before { public_page.title = "My Public Page" }
+
+        it "should return the status code" do
+          is_expected.to eq "404"
         end
       end
     end

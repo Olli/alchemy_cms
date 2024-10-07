@@ -1,0 +1,227 @@
+table {
+  border-style: none;
+  border-spacing: 0 var(--spacing-1);
+  padding: 0;
+  font-size: inherit;
+  width: 100%;
+
+  &.list .tools {
+    background-color: transparent;
+    padding: var(--spacing-2);
+  }
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--spacing-1);
+
+  .row,
+  header {
+    display: flex;
+  }
+
+  .col {
+    flex: 1;
+  }
+
+  .tools {
+    flex: 0;
+    white-space: nowrap;
+  }
+}
+
+.list td,
+.list th,
+.table .col {
+  padding: var(--spacing-2) var(--spacing-3);
+  vertical-align: top;
+  line-height: 22px;
+  border-right: 1px solid var(--color-grey_light);
+  transition: background-color $transition-duration;
+
+  &:last-child {
+    border-right: 0 none;
+  }
+
+  &.wrap-text {
+    white-space: normal !important;
+  }
+
+  &.icon {
+    width: 16px;
+    text-align: center;
+    background-color: transparent;
+  }
+}
+
+.list th {
+  position: relative;
+
+  &.icon {
+    border-bottom: 1px solid var(--color-grey_light);
+  }
+}
+
+th,
+.table header .col {
+  white-space: nowrap;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-grey_light);
+  font-weight: bold;
+}
+
+tr.even td,
+.table .row.even .col {
+  background-color: $table-row-even-background-color;
+}
+
+tr.odd td,
+.table .row.odd .col {
+  background-color: $table-row-odd-background-color;
+}
+
+.list tr .tools,
+.table .row .col.tools {
+  padding: var(--spacing-1) var(--spacing-2);
+  white-space: nowrap;
+  @extend .disable-user-select;
+  background-color: transparent;
+}
+
+.list tr .tools {
+  width: 40px;
+
+  &.long {
+    width: 60px;
+  }
+}
+
+td.heading {
+  padding: var(--spacing-1) 0;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.list .tools alchemy-icon,
+.list td.icon alchemy-icon {
+  @extend .disable-user-select;
+  margin: var(--spacing-0) 0;
+}
+
+.list tr:hover td,
+.table .row:hover .col {
+  background-color: $table-row-hover-color;
+}
+
+td,
+th,
+.table .col {
+  &.center,
+  &.boolean {
+    text-align: center;
+  }
+
+  &.right {
+    text-align: right;
+  }
+}
+
+td,
+.table .col {
+  &.file_name {
+    white-space: nowrap;
+  }
+
+  &.file_type {
+    width: 130px;
+  }
+
+  &.file_size {
+    width: 80px;
+  }
+
+  &.date {
+    width: 150px;
+  }
+
+  &.datetime {
+    width: 180px;
+  }
+
+  &.login {
+    width: 150px;
+  }
+
+  &.email {
+    width: 270px;
+  }
+
+  &.role {
+    width: 10%;
+  }
+
+  &.rights {
+    width: 60px;
+  }
+
+  &.page_layout {
+    width: 10%;
+  }
+
+  &.url {
+    width: 15%;
+    white-space: nowrap;
+  }
+
+  &.status {
+    width: 5%;
+    white-space: nowrap;
+
+    .page_status {
+      margin: 0 var(--spacing-1);
+    }
+  }
+
+  &.tags {
+    width: 220px;
+    padding: var(--spacing-1) var(--spacing-3);
+
+    .tag {
+      margin: var(--spacing-1) 0;
+      padding: var(--spacing-1) var(--spacing-2);
+    }
+  }
+}
+
+th.count,
+td.count {
+  width: 10%;
+  text-align: right;
+  padding-right: var(--spacing-4);
+}
+
+td.taggings_types {
+  width: 15%;
+}
+
+.list .login_status {
+  width: 16px;
+}
+
+td#user_roles {
+  padding: 9px 0;
+
+  label {
+    display: inline-block;
+    vertical-align: middle;
+    white-space: nowrap;
+    min-width: 40%;
+  }
+}
+
+.sort_link {
+  display: inline-flex;
+  align-items: center;
+}

@@ -64,10 +64,10 @@ RSpec.describe "Picture Library", type: :system do
     end
   end
 
-  describe "Picture descriptions" do
+  describe "Picture descriptions", :js do
     let!(:picture) { create(:alchemy_picture) }
 
-    scenario "allows to add a picture description", :js do
+    scenario "allows to add a picture description" do
       visit alchemy.admin_pictures_path
       page.find("a.thumbnail_background").click
       expect(page).to have_field("Description")
@@ -76,21 +76,47 @@ RSpec.describe "Picture Library", type: :system do
       within "#flash_notices" do
         expect(page).to have_content("Picture updated successfully")
       end
-      expect(picture.description_for(language)).to eq("This is an amazing image.")
+      expect(picture.reload.description_for(language)).to eq("This is an amazing image.")
     end
 
-    scenario "allows to add multi language picture descriptions", :js do
+    scenario "allows to add multi language picture descriptions" do
       german = create(:alchemy_language, :german)
       visit alchemy.admin_pictures_path
       page.find("a.thumbnail_background").click
       expect(page).to have_field("Description")
+      fill_in "Description", with: "This is an amazing image."
+      click_button "Save"
+      within "#flash_notices" do
+        expect(page).to have_content("Picture updated successfully")
+      end
+
       select(german.language_code.upcase, from: "Language")
       fill_in "Description", with: "Tolles Bild."
       click_button "Save"
       within "#flash_notices" do
         expect(page).to have_content("Picture updated successfully")
       end
-      expect(picture.description_for(german)).to eq("Tolles Bild.")
+      select(language.language_code.upcase, from: "Language")
+      expect(page).to have_field("Description", with: "This is an amazing image.")
+    end
+  end
+
+  describe "Updating Pictures", :js do
+    let!(:picture) { create(:alchemy_picture) }
+
+    scenario "allows to update a pictures name" do
+      visit alchemy.admin_pictures_path
+      page.find("a.thumbnail_background").click
+      expect(page).to have_field("Name")
+      fill_in "Name", with: "my-amazing-image"
+      click_button "Save"
+      within "#flash_notices" do
+        expect(page).to have_content("Picture updated successfully")
+      end
+      find(".zoomed-picture-background").click
+      within "#picture_#{picture.id} .picture_name" do
+        expect(page).to have_content("my-amazing-image")
+      end
     end
   end
 end

@@ -4,18 +4,18 @@ source "https://rubygems.org"
 
 gemspec
 
-rails_version = ENV.fetch("RAILS_VERSION", "7.1")
+rails_version = ENV.fetch("RAILS_VERSION", "7.2")
 gem "rails", "~> #{rails_version}.0"
 
 if ENV["DB"].nil? || ENV["DB"] == "sqlite"
-  gem "sqlite3", "~> 1.7.0"
+  gem "sqlite3", (rails_version == "7.0") ? "~> 1.7.0" : "~> 2.0.0"
 end
 if ENV["DB"] == "mysql" || ENV["DB"] == "mariadb"
   gem "mysql2", "~> 0.5.1"
 end
 gem "pg", "~> 1.0" if ENV["DB"] == "postgresql"
 
-gem "alchemy_i18n", git: "https://github.com/AlchemyCMS/alchemy_i18n.git", branch: "main"
+gem "alchemy_i18n", github: "AlchemyCMS/alchemy_i18n", branch: "download-flatpickr-locales"
 
 group :development, :test do
   gem "execjs", "~> 2.9.1"
@@ -26,7 +26,6 @@ group :development, :test do
     gem "simplecov-cobertura", "~> 2.1"
     # Necessary because GH Actions gem cache does not have this "Bundled with Ruby" gem installed
     gem "rexml", "~> 3.2.4"
-    gem "sassc", "~> 2.4.0" # https://github.com/sass/sassc-ruby/issues/146
 
     # https://github.com/hotwired/turbo-rails/issues/512
     if rails_version == "7.1"
@@ -38,14 +37,13 @@ group :development, :test do
     gem "bumpy"
     gem "yard"
     gem "redcarpet"
-    gem "pry-byebug"
+    gem "debug"
     gem "listen"
     gem "localeapp", "~> 3.0", require: false
     gem "dotenv", "~> 3.0"
     gem "github_fast_changelog", require: false
     gem "active_record_query_trace", require: false
     gem "rack-mini-profiler", require: false
-    gem "rufo", require: false
     gem "brakeman", require: false
   end
 end
@@ -60,3 +58,5 @@ end
 gem "web-console", "~> 4.2", group: :development
 
 gem "rails_live_reload", "~> 0.3.5"
+
+gem "dartsass-rails", "~> 0.5.0"

@@ -8,7 +8,6 @@ module Alchemy
   describe ElementsBlockHelper do
     let(:page) { create(:alchemy_page, :public) }
     let(:element) { create(:alchemy_element, page: page, tag_list: "foo, bar") }
-    let(:expected_wrapper_tag) { "div.#{element.name}##{element.dom_id}" }
 
     describe "#element_view_for" do
       it "should yield an instance of ElementViewHelper" do
@@ -18,22 +17,24 @@ module Alchemy
 
       it "should wrap its output in a DOM element" do
         expect(element_view_for(element))
-          .to have_css expected_wrapper_tag
+          .to have_css "div"
       end
 
-      it "should change the wrapping DOM element according to parameters" do
-        expect(element_view_for(element, tag: "span", class: "some_class", id: "some_id"))
-          .to have_css "span.some_class#some_id"
+      context "when id and class options are given" do
+        it "should change the wrapping DOM element according to parameters" do
+          expect(element_view_for(element, tag: "span", class: "some_class", id: "some_id"))
+            .to have_css "span.some_class#some_id"
+        end
       end
 
       it "should include the element's tags in the wrapper DOM element" do
         expect(element_view_for(element))
-          .to have_css "#{expected_wrapper_tag}[data-element-tags='foo bar']"
+          .to have_css "div[data-element-tags='foo bar']"
       end
 
       it "should use the provided tags formatter to format tags" do
         expect(element_view_for(element, tags_formatter: lambda { |tags| tags.join ", " }))
-          .to have_css "#{expected_wrapper_tag}[data-element-tags='foo, bar']"
+          .to have_css "div[data-element-tags='foo, bar']"
       end
 
       it "should include the ingredients rendered by the block passed to it" do
@@ -44,15 +45,15 @@ module Alchemy
 
       context "when/if preview mode is not active" do
         subject { element_view_for(element) }
-        it { is_expected.to have_css expected_wrapper_tag }
-        it { is_expected.not_to have_css "#{expected_wrapper_tag}[data-alchemy-element]" }
+        it { is_expected.to have_css "div" }
+        it { is_expected.not_to have_css "div[data-alchemy-element]" }
       end
 
       context "when/if preview mode is active" do
         include_context "in preview mode"
 
         subject { helper.element_view_for(element) }
-        it { is_expected.to have_css "#{expected_wrapper_tag}[data-alchemy-element='#{element.id}']" }
+        it { is_expected.to have_css "div[data-alchemy-element='#{element.id}']" }
       end
     end
 

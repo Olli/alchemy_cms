@@ -1,18 +1,20 @@
+// We still use jQuery in some places (ie. select2)
+import "handlebars"
+import "jquery"
 import "@ungap/custom-elements"
 import "@hotwired/turbo-rails"
+import "select2"
 
 import Rails from "@rails/ujs"
 
-import GUI from "alchemy_admin/gui"
 import { translate } from "alchemy_admin/i18n"
+import { currentDialog, closeCurrentDialog } from "alchemy_admin/dialog"
 import Dirty from "alchemy_admin/dirty"
+import * as FixedElements from "alchemy_admin/fixed_elements"
 import { growl } from "alchemy_admin/growler"
-import IngredientAnchorLink from "alchemy_admin/ingredient_anchor_link"
 import ImageLoader from "alchemy_admin/image_loader"
-import ImageCropper from "alchemy_admin/image_cropper"
 import Initializer from "alchemy_admin/initializer"
 import { LinkDialog } from "alchemy_admin/link_dialog"
-import pictureSelector from "alchemy_admin/picture_selector"
 import pleaseWaitOverlay from "alchemy_admin/please_wait_overlay"
 import Sitemap from "alchemy_admin/sitemap"
 import Spinner from "alchemy_admin/spinner"
@@ -26,6 +28,9 @@ import {
 // Web Components
 import "alchemy_admin/components"
 
+// Handlebars Templates
+import "alchemy_admin/templates/compiled"
+
 // Shoelace Setup
 import "alchemy_admin/shoelace_theme"
 
@@ -36,15 +41,14 @@ if (typeof window.Alchemy === "undefined") {
 
 // Enhance the global Alchemy object with imported features
 Object.assign(Alchemy, {
+  closeCurrentDialog,
+  currentDialog,
   ...Dirty,
-  GUI,
   t: translate, // Global utility method for translating a given string
+  FixedElements,
   growl,
   ImageLoader: ImageLoader.init,
-  ImageCropper,
-  IngredientAnchorLink,
   LinkDialog,
-  pictureSelector,
   pleaseWaitOverlay,
   Sitemap,
   Spinner,

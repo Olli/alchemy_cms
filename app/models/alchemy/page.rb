@@ -200,20 +200,6 @@ module Alchemy
         %w[name urlname title]
       end
 
-      # Used to store the current page previewed in the edit page template.
-      # @deprecated Use {Alchemy::Current#preview_page=} instead.
-      def current_preview=(page)
-        Current.preview_page = page
-      end
-      deprecate "current_preview=": :"Alchemy::Current.preview_page=", deprecator: Alchemy::Deprecation
-
-      # Returns the current page previewed in the edit page template.
-      # @deprecated Use {Alchemy::Current#preview_page} instead.
-      def current_preview
-        Current.preview_page
-      end
-      deprecate current_preview: :"Alchemy::Current.preview_page", deprecator: Alchemy::Deprecation
-
       # @return the language root page for given language id.
       # @param language_id [Fixnum]
       #
@@ -491,7 +477,7 @@ module Alchemy
     # does not respond to +#name+ it returns +'unknown'+
     #
     def creator_name
-      creator.try(:name) || Alchemy.t("unknown")
+      creator.try(:alchemy_display_name) || Alchemy.t("unknown")
     end
 
     # Returns the name of the last updater of this page.
@@ -500,7 +486,7 @@ module Alchemy
     # does not respond to +#name+ it returns +'unknown'+
     #
     def updater_name
-      updater.try(:name) || Alchemy.t("unknown")
+      updater.try(:alchemy_display_name) || Alchemy.t("unknown")
     end
 
     # Returns the name of the user currently editing this page.
@@ -509,7 +495,7 @@ module Alchemy
     # does not respond to +#name+ it returns +'unknown'+
     #
     def locker_name
-      locker.try(:name) || Alchemy.t("unknown")
+      locker.try(:alchemy_display_name) || Alchemy.t("unknown")
     end
 
     # Key hint translations by page layout, rather than the default name.

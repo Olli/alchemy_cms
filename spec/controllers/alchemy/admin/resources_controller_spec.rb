@@ -85,10 +85,9 @@ describe Admin::EventsController do
 
   describe "#update" do
     let(:params) { {q: {name_or_hidden_name_or_description_or_location_name_cont: "some_query"}, page: 6} }
+    let(:peter) { create(:event, name: "Peter") }
 
     context "with regular noun model name" do
-      let(:peter) { create(:event, name: "Peter") }
-
       it "redirects to index, keeping the current location parameters" do
         post :update, params: {id: peter.id, event: {name: "Hans"}}.merge(params)
         expect(response.redirect_url).to eq("http://test.host/admin/events?page=6&q%5Bname_or_hidden_name_or_description_or_location_name_cont%5D=some_query")
@@ -100,9 +99,21 @@ describe Admin::EventsController do
       let(:params) { {q: {name_cont: "some_query"}, page: 6} }
 
       it "redirects to index, keeping the current location parameters" do
-        expect(controller).to receive(:controller_path) { "admin/series" }
+        expect(controller).to receive(:controller_path).twice { "admin/series" }
         post :update, params: {id: peter.id, series: {name: "Hans"}}.merge(params)
         expect(response.redirect_url).to eq("http://test.host/admin/series?page=6&q%5Bname_cont%5D=some_query")
+      end
+    end
+
+    context "with failing validations" do
+      subject { post :update, params: {id: peter.id, event: {name: ""}} }
+
+      it "renders edit form" do
+        is_expected.to render_template(:edit)
+      end
+
+      it "sets 422 status" do
+        expect(subject.status).to eq 422
       end
     end
   end
@@ -122,10 +133,19 @@ describe Admin::EventsController do
       let(:params) { {q: {name_cont: "some_query"}, page: 6} }
 
       it "redirects to index, keeping the current location parameters" do
-        expect(controller).to receive(:controller_path) { "admin/series" }
+        expect(controller).to receive(:controller_path).twice { "admin/series" }
         post :create, params: {series: {name: "Hans"}}.merge(params)
         expect(response.redirect_url).to eq("http://test.host/admin/series?page=6&q%5Bname_cont%5D=some_query")
       end
+    end
+  end
+
+  describe "#show" do
+    let(:event) { create(:event) }
+
+    it "renders the edit template" do
+      get :show, params: {id: event.id}
+      expect(response).to render_template(:edit)
     end
   end
 

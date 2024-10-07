@@ -91,6 +91,9 @@
       hint: true
       validate:
         - presence
+        - length:
+            minimum: 3
+            maximum: 50
     - role: text
       type: Text
       hint: true
@@ -125,6 +128,8 @@
     - role: datetime
       type: Datetime
       hint: true
+      settings:
+        input_type: datetime
     - role: file
       type: File
       hint: true
@@ -135,6 +140,8 @@
     - role: link
       type: Link
       hint: true
+      validate:
+        - presence
     - role: node
       type: Node
       hint: true

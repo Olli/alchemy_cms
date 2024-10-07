@@ -105,6 +105,37 @@ RSpec.describe "Resources", type: :system do
               expect(page).to_not have_content("today 1")
             end
           end
+
+          it "can combine filters and pagination", :js do
+            stub_alchemy_config(:items_per_page, 1)
+
+            visit "/admin/events?filter[start]=starting_today"
+
+            select("4", from: "per_page")
+
+            within "div#archive_all table.list tbody" do
+              expect(page).to have_selector("tr", count: 2)
+              expect(page).to have_content("today 1")
+              expect(page).to have_content("today 2")
+              expect(page).not_to have_content("yesterday")
+            end
+          end
+
+          it "can combine ransack queries and pagination", :js do
+            allow_any_instance_of(Admin::EventsController).to receive(:permitted_ransack_search_fields).and_return([:name_start])
+            stub_alchemy_config(:items_per_page, 1)
+
+            visit "/admin/events?q[name_start]=today"
+
+            select("4", from: "per_page")
+
+            within "div#archive_all table.list tbody" do
+              expect(page).to have_selector("tr", count: 2)
+              expect(page).to have_content("today 1")
+              expect(page).to have_content("today 2")
+              expect(page).not_to have_content("yesterday")
+            end
+          end
         end
       end
 
@@ -226,7 +257,7 @@ RSpec.describe "Resources", type: :system do
       end
 
       it "shows a success message" do
-        expect(page).to have_content("Successfully created")
+        expect(page).to have_content("Event successfully created.")
       end
     end
 
@@ -246,7 +277,7 @@ RSpec.describe "Resources", type: :system do
       end
 
       it "should not display success notice" do
-        expect(page).not_to have_content("successfully created")
+        expect(page).not_to have_content("Event successfully created.")
       end
     end
   end
@@ -263,7 +294,7 @@ RSpec.describe "Resources", type: :system do
     end
 
     it "shows a success message" do
-      expect(page).to have_content("Successfully updated")
+      expect(page).to have_content("Event successfully updated.")
     end
   end
 
@@ -283,7 +314,7 @@ RSpec.describe "Resources", type: :system do
     end
 
     it "should display success message" do
-      expect(page).to have_content("Successfully removed")
+      expect(page).to have_content("Event successfully removed.")
     end
   end
 

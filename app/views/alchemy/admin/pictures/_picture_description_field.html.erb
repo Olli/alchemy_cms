@@ -1,5 +1,5 @@
 <div class="input">
-  <% if Alchemy::Language.many? %>
+  <% if Alchemy::Language.published.many? %>
     <label class="inline-label" style="float: right">
       <%= Alchemy::Language.model_name.human %>
       <%= select_tag :language_id, options_from_collection_for_select(
@@ -21,9 +21,11 @@
 <script type="module">
   const select = document.querySelector("#language_id")
 
-  select.addEventListener("change", () => {
-    const url = new URL(select.dataset.url)
-    url.searchParams.set("language_id", select.value)
-    Turbo.visit(url, { frame: "picture_descriptions" })
-  })
+  if (select) {
+    select.addEventListener("change", () => {
+      const url = new URL(select.dataset.url)
+      url.searchParams.set("language_id", select.value)
+      Turbo.visit(url, { frame: "picture_descriptions" })
+    })
+  }
 </script>

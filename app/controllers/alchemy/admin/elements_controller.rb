@@ -41,12 +41,12 @@ module Alchemy
           end
         end
         if @element.save
-          render :create
+          render :create, status: :created
         else
           @element.page_version = @page_version
           @elements = @page.available_element_definitions
           load_clipboard_items
-          render :new
+          render :new, status: :unprocessable_entity
         end
       end
 
@@ -69,9 +69,13 @@ module Alchemy
           render json: {
             warning: @warning,
             errorMessage: Alchemy.t(:ingredient_validations_headline),
-            ingredientsWithErrors: @element.ingredients_with_errors.map(&:id),
-            errors: @element.ingredient_error_messages
-          }
+            ingredientsWithErrors: @element.ingredients_with_errors.map do |ingredient|
+              {
+                id: ingredient.id,
+                errorMessage: ingredient.errors.messages[:value].to_sentence
+              }
+            end
+          }, status: :unprocessable_entity
         end
       end
 

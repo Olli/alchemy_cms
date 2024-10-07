@@ -1,0 +1,52 @@
+.node-select--node,
+.node-select--node-url {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.node-select--node {
+  display: flex;
+  align-items: center;
+  height: 21px;
+
+  > alchemy-icon {
+    margin: 0 var(--spacing-2) 0 var(--spacing-1);
+  }
+
+  .icon {
+    .select2-highlighted & {
+      fill: var(--color-white);
+    }
+  }
+}
+
+.node-select--node-display_name,
+.node-select--node-ancestors {
+  display: inline-flex;
+  align-items: center;
+}
+
+.node-select--node-name {
+  font-weight: bold;
+}
+
+.node-select--node-url {
+  margin-left: auto;
+  padding: var(--spacing-1) var(--spacing-2);
+  color: var(--color-grey_dark);
+  font-size: var(--font-size_small);
+
+  .select2-highlighted & {
+    color: var(--color-white);
+  }
+}
+
+// The container of the rendered node is slightly larger than other a line of
+// text, as it would be for the Alchemy::Ingredients::Page. Reducing the padding here from 0.6em
+// to 0.4em centers the content nicely.
+.ingredient-editor.node {
+  .select2-container.alchemy_selectbox .select2-choice {
+    padding: 0.4em 0.75em;
+  }
+}

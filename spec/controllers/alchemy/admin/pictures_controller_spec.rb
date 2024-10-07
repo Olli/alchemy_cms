@@ -134,7 +134,7 @@ module Alchemy
       subject { post :create, params: params }
 
       let(:params) { {picture: {name: ""}} }
-      let(:picture) { mock_model("Picture", humanized_name: "Cute kittens", to_jq_upload: {}) }
+      let(:picture) { mock_model("Picture", humanized_name: "Cute kittens") }
 
       context "with passing validations" do
         before do
@@ -150,7 +150,6 @@ module Alchemy
           expect(response.status).to eq(201)
           json = JSON.parse(response.body)
           expect(json).to have_key("message")
-          expect(json).to have_key("files")
         end
       end
 
@@ -245,6 +244,10 @@ module Alchemy
           subject
           expect(assigns(:message)[:body]).to eq(Alchemy.t(:picture_update_failed))
           expect(assigns(:message)[:type]).to eq("error")
+        end
+
+        it "sets 422 status" do
+          expect(subject.status).to eq 422
         end
       end
 

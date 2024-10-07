@@ -1,0 +1,32 @@
+div#flash_notices {
+  position: fixed;
+  right: 0;
+  z-index: 400000;
+  width: 400px;
+  top: 0;
+
+  alchemy-message {
+    font-weight: bold;
+    margin: var(--spacing-1) var(--spacing-1) var(--spacing-2);
+    opacity: 0.95;
+    transition-property: opacity, transform;
+    transition-duration: 0.4s;
+
+    &.dismissed {
+      display: block;
+      opacity: 0;
+      transform: translate3d(0, -100%, 0);
+    }
+
+    &[type="error"] {
+      cursor: pointer;
+      padding-right: var(--spacing-8);
+
+      alchemy-icon[name="close"] {
+        position: absolute;
+        left: initial;
+        right: var(--spacing-2);
+      }
+    }
+  }
+}

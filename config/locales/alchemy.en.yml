@@ -140,28 +140,6 @@ en:
             recent: Recently uploaded only
             without_tag: Without tag
 
-    # === Translations for ingredient validations
-    # Used when a user did not enter (correct) values to the ingredient field.
-    #
-    # Tip: You can define the validation messages translations different for each element and ingredient
-    #
-    # Example:
-    #
-    # en:
-    #   alchemy:
-    #     ingredient_validations:
-    #       contactform:
-    #         success_page:
-    #           blank: 'Please choose a follow up page.'
-    #         mail_to:
-    #           blank: 'Please provide an email address where the contact inquiries will be delivered to.'
-    #
-    ingredient_validations:
-      errors:
-        blank: "%{field} can't be blank"
-        invalid: "%{field} has wrong format"
-        taken: "%{field} has already been taken"
-
     default_ingredient_texts:
       lorem: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
       corporate_lorem: "Appropriately enable sustainable growth strategies vis-a-vis holistic materials. Energistically orchestrate open-source e-tailers vis-a-vis plug-and-play best practices. Uniquely plagiarize client-centric opportunities whereas plug-and-play ideas. Distinctively reconceptualize backward-compatible partnerships vis-a-vis reliable total linkage. Interactively fabricate highly efficient networks for clicks-and-mortar content. Collaboratively reconceptualize holistic markets via 2.0 architectures."
@@ -572,14 +550,15 @@ en:
     please_confirm: "Please confirm"
     please_wait: "Please wait"
     position_in_text: "Position in text"
-    preview_size: "Preview size"
+    preview_size: "Preview Size"
     preview_sizes:
-      "240": "240px (small phone)"
-      "320": "320px (iPhone)"
-      "480": "480px (small Tablet)"
-      "768": "768px (iPad - Portrait)"
-      "1024": "1024px (iPad - Landscape)"
-      "1280": "1280px (Desktop)"
+      "auto": "Auto"
+      "360": "Phone (360px)"
+      "640": "Small Tablet (640px)"
+      "768": "iPad Portrait (768px)"
+      "1024": "iPad Landscape (1024px)"
+      "1280": "Laptop (1280px)"
+      "1440": "Desktop (1440px)"
     preview_url: Preview
     publish_page_language_not_public: Cannot publish page if language is not public
     publish_page_not_allowed: You have not the permission to publish this page
@@ -591,7 +570,12 @@ en:
     replace: replace
     replace_file: Replace file
     "Replaced Tag": "Tag '%{old_tag}' was replaced with '%{new_tag}'"
+    "%{resource_name} successfully %{action}": "%{resource_name} successfully %{action}."
     resources:
+      actions:
+        created: "created"
+        updated: "updated"
+        removed: "removed"
       relation_select:
         blank: "- none -"
     right: "right"

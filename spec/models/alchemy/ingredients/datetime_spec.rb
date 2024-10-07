@@ -16,12 +16,22 @@ RSpec.describe Alchemy::Ingredients::Datetime do
     )
   end
 
+  describe ".allowed_settings" do
+    it "sets allowed_settings" do
+      expect(described_class.allowed_settings).to eq([:date_format, :input_type])
+    end
+  end
+
   describe "value" do
-    subject { datetime_ingredient.value }
+    subject(:value) { datetime_ingredient.value }
 
     it "returns a time object" do
       is_expected.to be_an(Time)
       is_expected.to eq("01.04.2021")
+    end
+
+    it "timezone is UTC" do
+      expect(value.zone).to eq("UTC")
     end
 
     context "without value" do

@@ -102,8 +102,6 @@ module Alchemy
     def element_view_for(element, options = {})
       options = {
         tag: :div,
-        id: element.dom_id,
-        class: element.name,
         tags_formatter: ->(tags) { tags.join(" ") }
       }.merge(options)
 

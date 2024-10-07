@@ -126,27 +126,6 @@ module Alchemy
       end
     end
 
-    describe ".dom_id_class" do
-      it "defaults to Alchemy::Element::DomId" do
-        expect(described_class.dom_id_class).to eq(Alchemy::Element::DomId)
-      end
-    end
-
-    describe ".dom_id_class=" do
-      let(:dummy_dom_id) { Class.new }
-
-      around do |example|
-        default_class = described_class.dom_id_class
-        described_class.dom_id_class = dummy_dom_id
-        example.run
-        described_class.dom_id_class = default_class
-      end
-
-      it "sets the dom id class" do
-        expect(described_class.dom_id_class).to eq(dummy_dom_id)
-      end
-    end
-
     describe ".copy" do
       subject { Element.copy(element) }
 
@@ -233,8 +212,8 @@ module Alchemy
         let(:yaml) { "- name: :symbol" }
 
         before do
-          expect(File).to receive(:exist?).and_return(true)
-          expect(File).to receive(:read).and_return(yaml)
+          allow(File).to receive(:exist?).and_return(true)
+          allow(File).to receive(:read).and_return(yaml)
         end
 
         it "returns the definition without error" do
@@ -246,8 +225,8 @@ module Alchemy
         let(:yaml) { "- default: 2017-12-24" }
 
         before do
-          expect(File).to receive(:exist?).and_return(true)
-          expect(File).to receive(:read).and_return(yaml)
+          allow(File).to receive(:exist?).and_return(true)
+          allow(File).to receive(:read).and_return(yaml)
         end
 
         it "returns the definition without error" do
@@ -259,8 +238,8 @@ module Alchemy
         let(:yaml) { "- format: !ruby/regexp '/\A[^@\s]+@([^@\s]+.)+[^@\s]+\z/'" }
 
         before do
-          expect(File).to receive(:exist?).and_return(true)
-          expect(File).to receive(:read).and_return(yaml)
+          allow(File).to receive(:exist?).and_return(true)
+          allow(File).to receive(:read).and_return(yaml)
         end
 
         it "returns the definition without error" do
@@ -467,15 +446,6 @@ module Alchemy
       it "returns a string with display name and preview text" do
         allow(element).to receive(:preview_text).and_return("Fula")
         expect(element.display_name_with_preview_text).to eq("Foo: Fula")
-      end
-    end
-
-    describe "#dom_id" do
-      let(:element) { build_stubbed(:alchemy_element, position: 1) }
-
-      it "calls dom id class" do
-        expect(Alchemy::Element.dom_id_class).to receive(:new).with(element).and_call_original
-        element.dom_id
       end
     end
 
