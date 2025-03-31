@@ -1,0 +1,7 @@
+@use "../variables" as vars;
+
+.like-hint-tooltip {
+  cursor: help;
+  --sl-tooltip-background-color: #{vars.$hint-background-color};
+  --sl-tooltip-color: #{vars.$hint-text-color};
+}

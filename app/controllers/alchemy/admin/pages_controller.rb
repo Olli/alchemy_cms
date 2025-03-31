@@ -37,6 +37,11 @@ module Alchemy
         if: :run_on_page_layout_callbacks?,
         only: [:show]
 
+      add_alchemy_filter :by_page_layout, type: :select, options: PageLayout.all.map { |p| [Alchemy.t(p["name"], scope: "page_layout_names"), p["name"]] }
+      add_alchemy_filter :published, type: :checkbox
+      add_alchemy_filter :not_public, type: :checkbox
+      add_alchemy_filter :restricted, type: :checkbox
+
       def index
         @query = @current_language.pages.contentpages.ransack(search_filter_params[:q])
 
@@ -46,10 +51,6 @@ module Alchemy
 
           if search_filter_params[:tagged_with].present?
             items = items.tagged_with(search_filter_params[:tagged_with])
-          end
-
-          if search_filter_params[:filter].present?
-            items = apply_filters(items)
           end
 
           items = items.page(params[:page] || 1).per(items_per_page)
@@ -69,7 +70,7 @@ module Alchemy
         Current.preview_page = @page
         # Setting the locale to pages language, so the page content has it's correct translations.
         ::I18n.locale = @page.language.locale
-        render(layout: Alchemy::Config.get(:admin_page_preview_layout) || "application")
+        render(layout: Alchemy.config.get(:admin_page_preview_layout) || "application")
       end
 
       def info
@@ -193,11 +194,7 @@ module Alchemy
       end
 
       def unlock_redirect_path
-        if params[:redirect_to].to_s.match?(/\A\/admin\/(layout_)?pages/)
-          params[:redirect_to]
-        else
-          admin_pages_path
-        end
+        safe_redirect_path(fallback: admin_pages_path)
       end
 
       # Sets the page public and updates the published_at attribute that is used as cache_key

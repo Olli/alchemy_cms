@@ -16,8 +16,30 @@ module Alchemy
       end
     end
 
-    initializer "alchemy.non_digest_assets" do
-      NonStupidDigestAssets.whitelist += [/^tinymce\//]
+    initializer "alchemy.assets" do |app|
+      if defined?(Sprockets)
+        require_relative "../non_stupid_digest_assets"
+        NonStupidDigestAssets.whitelist += [/^tinymce\//]
+        app.config.assets.precompile << "alchemy_manifest.js"
+      end
+    end
+
+    initializer "alchemy.admin_stylesheets" do |app|
+      if defined?(Sprockets)
+        Alchemy.admin_stylesheets.each do |stylesheet|
+          app.config.assets.precompile << stylesheet
+        end
+      end
+    end
+
+    initializer "alchemy.propshaft" do |app|
+      if defined?(Propshaft)
+        if app.config.assets.server
+          # Monkey-patch Propshaft::Asset to enable access
+          # of TinyMCE assets without a hash digest.
+          require_relative "propshaft/tinymce_asset"
+        end
+      end
     end
 
     initializer "alchemy.importmap" do |app|
@@ -75,11 +97,23 @@ module Alchemy
       end
     end
 
+    initializer "alchemy.config_yml" do |app|
+      config_directory = Rails.root.join("config", "alchemy")
+      main_config = config_directory.join("config.yml")
+      env_specific_config = config_directory.join("#{Rails.env}.config.yml")
+      if File.exist?(main_config)
+        Alchemy.config.set_from_yaml(main_config)
+      end
+      if File.exist?(env_specific_config)
+        Alchemy.config.set_from_yaml(env_specific_config)
+      end
+    end
+
     config.after_initialize do
       if Alchemy.user_class
         ActiveSupport.on_load(:active_record) do
           Alchemy.user_class.model_stamper
-          Alchemy.user_class.stampable(stamper_class_name: Alchemy.user_class.name)
+          Alchemy.user_class.stampable(stamper_class_name: Alchemy.user_class_name)
         end
       end
 

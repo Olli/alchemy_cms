@@ -1,0 +1,181 @@
+@use "../mixins";
+@use "../variables" as vars;
+
+html {
+  box-sizing: border-box;
+  height: 100%;
+  font-size: vars.$base-font-size;
+
+  &.turbo-progress-bar::before,
+  .turbo-progress-bar {
+    background-color: var(--color-blue_medium) !important;
+    z-index: 400001;
+  }
+
+  &.loading-custom-elements body {
+    opacity: 0;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+noscript {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  width: 100%;
+  text-align: center;
+  line-height: 1em;
+  border-bottom: 1px solid vars.$warning_border_color;
+  color: vars.$warning_text_color;
+  background-color: vars.$warning_background_color;
+
+  h1,
+  p {
+    margin: var(--spacing-4) 0;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--color-text);
+  font: vars.$default-font-style;
+  background-color: vars.$body-background-color;
+  height: 100%;
+  cursor: default;
+  opacity: 1;
+  transition: opacity vars.$transition-duration;
+
+  // Fix for strange element window offset
+  &.pages.edit {
+    overflow: hidden;
+  }
+
+  &.prevent-scrolling {
+    overflow: hidden;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: vars.$transition-duration;
+
+  &:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+  }
+
+  img {
+    border: none;
+  }
+}
+
+a:focus,
+[tabindex]:focus {
+  @include mixins.default-focus-style;
+}
+
+form {
+  margin-bottom: 0;
+}
+
+hr {
+  border: 0 none;
+  border-bottom: 1px solid;
+  opacity: 0.5;
+}
+
+.panel {
+  width: 80%;
+  max-width: 500px;
+  margin: 2em auto;
+  padding: var(--spacing-4);
+  background: var(--color-grey_light);
+  border-radius: var(--border-radius_medium);
+}
+
+.float_right {
+  float: right;
+}
+
+.float_left {
+  float: left;
+}
+
+.center {
+  text-align: center;
+}
+
+.top-rounded-border {
+  @include mixins.border-top-radius(vars.$default-border-radius);
+}
+
+.left-rounded-border {
+  @include mixins.border-left-radius(vars.$default-border-radius);
+}
+
+.right-rounded-border {
+  @include mixins.border-right-radius(vars.$default-border-radius);
+}
+
+.bottom-rounded-border {
+  @include mixins.border-bottom-radius(vars.$default-border-radius);
+}
+
+.bottom-left-rounded-border {
+  border-bottom-left-radius: var(--border-radius_medium);
+}
+
+.disable-user-select {
+  user-select: none;
+}
+
+.handle {
+  cursor: move;
+}
+
+.with_padding {
+  padding: var(--spacing-2);
+}
+
+.with_margin {
+  margin: var(--spacing-2);
+}
+
+a img {
+  border-style: none;
+}
+
+.full_width {
+  width: 100%;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.mx-1 {
+  margin-left: var(--spacing-1);
+  margin-right: var(--spacing-1);
+}
+
+.mx-2 {
+  margin-left: var(--spacing-2);
+  margin-right: var(--spacing-2);
+}
+
+.my-0 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.p-0 {
+  padding: 0 !important;
+}

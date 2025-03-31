@@ -1,0 +1,68 @@
+@use "sass:color";
+@use "mixins";
+@use "variables" as vars;
+
+%text-overflow {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  -ms-text-overflow: ellipsis;
+  -moz-text-overflow: ellipsis;
+}
+
+%field-with-error {
+  border-color: vars.$error_border_color;
+  color: vars.$error_text_color;
+  background-color: color.adjust(vars.$error_background_color, $lightness: 8%);
+  box-shadow: inset 0px 0 1px rgba(vars.$error_border_color, 0.5);
+}
+
+%default-input-style {
+  border-radius: vars.$default-border-radius;
+  box-shadow: vars.$form-field-box-shadow;
+  font: vars.$default-font-style;
+  color: vars.$form-field-text-color;
+  padding: vars.$form-field-padding;
+  margin: vars.$form-field-margin;
+  background: vars.$form-field-background-color;
+  border-width: vars.$form-field-border-width;
+  border-style: vars.$form-field-border-style;
+  border-color: vars.$form-field-border-color;
+  height: vars.$form-field-height;
+  width: 100%;
+  font-size: vars.$form-field-font-size;
+  line-height: vars.$form-field-line-height;
+  transition: vars.$transition-duration;
+
+  &:focus:not(.readonly) {
+    @include mixins.default-focus-style(
+      $box-shadow: 0 0 0 1px vars.$focus-color
+    );
+  }
+
+  &[disabled],
+  &.disabled,
+  &:not(.flatpickr-input)[readonly],
+  &:not(.flatpickr-input).readonly {
+    color: vars.$form-field-disabled-text-color;
+    background-color: vars.$form-field-disabled-bg-color;
+    cursor: default;
+  }
+
+  &[disabled],
+  &.disabled {
+    cursor: not-allowed;
+  }
+
+  &:not(.flatpickr-input)[readonly],
+  &:not(.flatpickr-input).readonly {
+    pointer-events: none;
+  }
+}
+
+%gradiated-toolbar {
+  background: vars.$toolbar-bg-color;
+  padding: var(--spacing-2) var(--spacing-1);
+  height: vars.$toolbar-height;
+}

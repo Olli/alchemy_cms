@@ -49,6 +49,31 @@ module Alchemy
       end
     end
 
+    describe ".file_types" do
+      let!(:attachment1) do
+        create(:alchemy_attachment, name: "Pee Dee Eff", file_name: "file.pdf", file_mime_type: "application/pdf")
+      end
+
+      let!(:attachment2) do
+        create(:alchemy_attachment, name: "Zip File", file_name: "archive.zip", file_mime_type: "application/zip")
+      end
+
+      it "should return all attachment file formats" do
+        expect(Attachment.file_types).to match_array [
+          ["PDF Document", "application/pdf"],
+          ["ZIP Archive", "application/zip"]
+        ]
+      end
+
+      context "with a scope" do
+        it "should only return scoped attachment file formats" do
+          expect(Attachment.file_types(Attachment.where(name: "file"))).to eq [
+            ["PDF Document", "application/pdf"]
+          ]
+        end
+      end
+    end
+
     describe "#url" do
       subject { attachment.url }
 
@@ -128,7 +153,7 @@ module Alchemy
     describe "validations" do
       context "having a png, but only pdf allowed" do
         before do
-          allow(Config).to receive(:get) do
+          allow(Alchemy.config).to receive(:get) do
             {"allowed_filetypes" => {"alchemy/attachments" => ["pdf"]}}
           end
         end
@@ -140,7 +165,7 @@ module Alchemy
 
       context "having a png and everything allowed" do
         before do
-          allow(Config).to receive(:get) do
+          allow(Alchemy.config).to receive(:get) do
             {"allowed_filetypes" => {"alchemy/attachments" => ["*"]}}
           end
         end

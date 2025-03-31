@@ -1,0 +1,319 @@
+@use "base";
+@use "../mixins";
+@use "../variables" as vars;
+
+#top_menu {
+  position: fixed;
+  top: 0;
+  margin-left: vars.$collapsed-main-menu-width;
+  padding-right: vars.$collapsed-main-menu-width;
+  z-index: 20;
+  width: 100%;
+  @extend .disable-user-select;
+
+  @media screen and (min-width: vars.$large-screen-break-point) {
+    body:not(.collapsed-menu) & {
+      margin-left: vars.$main-menu-width;
+      padding-right: vars.$main-menu-width;
+    }
+  }
+}
+
+#left_menu {
+  z-index: 30;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: vars.$collapsed-main-menu-width;
+  background-color: vars.$main-menu-bg-color;
+  @extend .disable-user-select;
+
+  @media screen and (min-width: vars.$large-screen-break-point) {
+    body:not(.collapsed-menu) & {
+      width: vars.$main-menu-width;
+    }
+  }
+}
+
+#main_navi {
+  max-height: 100vh;
+  padding-top: var(--spacing-7);
+  padding-bottom: 80px;
+
+  @media screen and (max-width: vars.$medium-screen-break-point) {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.main_navi_entry {
+  position: relative;
+  display: block;
+  line-height: 46px;
+  margin-bottom: var(--spacing-3);
+  background-color: transparent;
+  transition: background-color vars.$transition-duration vars.$transition-easing;
+
+  &:hover {
+    background-color: vars.$main-menu-active-bg-color;
+
+    .sub_navigation {
+      visibility: visible;
+      opacity: 1;
+      background-color: vars.$main-menu-active-bg-color;
+    }
+  }
+
+  &.active,
+  &:hover {
+    background-color: vars.$main-menu-active-bg-color;
+    cursor: default;
+
+    a,
+    .icon {
+      color: vars.$main-menu-active-text-color;
+      text-decoration: none;
+      text-shadow: none;
+
+      &:focus {
+        @include mixins.default-focus-style(
+          $box-shadow: inset 0 0 0 2px vars.$main-menu-active-text-color,
+          $border-radius: 0
+        );
+      }
+    }
+  }
+
+  label {
+    position: absolute;
+    top: 0;
+    left: vars.$collapsed-main-menu-width - 1;
+    width: auto;
+    padding-left: var(--spacing-4);
+    padding-right: var(--spacing-4);
+    visibility: hidden;
+    opacity: 0;
+    background-color: vars.$main-menu-active-bg-color;
+    transition: opacity vars.$transition-duration vars.$transition-easing;
+    vertical-align: middle;
+    cursor: pointer;
+    @include mixins.truncate(
+      vars.$collapsed-main-menu-entry-max-width,
+      $wrap: nowrap
+    );
+
+    @media screen and (min-width: vars.$large-screen-break-point) {
+      body:not(.collapsed-menu) & {
+        position: static;
+        visibility: visible;
+        max-width: vars.$main-menu-entry-max-width;
+        opacity: 1;
+        padding-left: var(--spacing-2);
+        background-color: transparent;
+      }
+    }
+  }
+
+  &.has_sub_navigation label {
+    display: none;
+
+    @media screen and (min-width: vars.$large-screen-break-point) {
+      body:not(.collapsed-menu) & {
+        display: inline-block;
+      }
+    }
+  }
+
+  &:hover label {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  svg {
+    fill: currentColor;
+    transition: fill vars.$transition-duration vars.$transition-easing;
+  }
+
+  img,
+  svg,
+  alchemy-icon {
+    display: inline-flex;
+    width: var(--icon-size-xxl);
+    height: var(--icon-size-xxl);
+    align-items: center;
+    justify-content: center;
+  }
+
+  img {
+    border-style: none;
+    vertical-align: -0.6em;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    height: 46px;
+    padding-left: 14px;
+    font-weight: bold;
+    color: vars.$main-menu-text-color;
+    transition: color vars.$transition-duration vars.$transition-easing;
+    @include mixins.antialiased-font-smoothing;
+
+    &:focus {
+      @include mixins.default-focus-style(
+        $box-shadow: inset 0 0 0 2px vars.$focus-color,
+        $border-radius: 0
+      );
+    }
+  }
+}
+
+.sub_navigation {
+  position: absolute;
+  width: auto;
+  left: vars.$collapsed-main-menu-width;
+  top: 0;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity vars.$transition-duration vars.$transition-easing;
+}
+
+.subnavi_tab {
+  &:first-of-type {
+    border-left: 1px solid vars.$main-menu-active-bg-color;
+    margin-left: -1px;
+  }
+
+  a {
+    padding-left: var(--spacing-4);
+    padding-right: var(--spacing-4);
+    background-color: transparent;
+    transition: background-color vars.$transition-duration
+      vars.$transition-easing;
+    @include mixins.truncate(
+      vars.$main-menu-width,
+      $display: block,
+      $wrap: nowrap
+    );
+  }
+
+  &.active a,
+  a:hover {
+    background-color: hsl(28deg, 77%, 63%);
+  }
+}
+
+:root {
+  --main-menu-width: #{vars.$main-menu-width};
+}
+
+.collapsed-menu {
+  --main-menu-width: #{vars.$collapsed-main-menu-width};
+}
+
+@media screen and (min-width: vars.$large-screen-break-point) {
+  body:not(.collapsed-menu) {
+    .sub_navigation {
+      left: vars.$main-menu-width;
+    }
+
+    .main_navi_entry.active {
+      .sub_navigation {
+        position: static;
+        visibility: visible;
+        opacity: 1;
+        width: auto;
+      }
+
+      .subnavi_tab {
+        line-height: 24px;
+
+        a {
+          padding: var(--spacing-2) var(--spacing-1) var(--spacing-2) 42px;
+        }
+      }
+    }
+  }
+}
+
+#locked_pages {
+  display: flex;
+  flex-grow: 1;
+  flex-wrap: nowrap;
+  height: vars.$header-height + 1px;
+
+  label {
+    float: left;
+    font-size: var(--font-size_small);
+    line-height: 27px;
+    height: 27px;
+    margin-left: var(--spacing-2);
+    margin-right: var(--spacing-1);
+  }
+
+  img {
+    float: left;
+  }
+
+  .subnavi_tab > a {
+    padding-right: 0;
+  }
+}
+
+.locked_page {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  color: #444;
+  border-right: vars.$default-border;
+  border-bottom: vars.$default-border;
+
+  form {
+    align-self: center;
+    justify-self: flex-end;
+    margin-right: var(--spacing-1);
+    line-height: 1;
+  }
+
+  &:hover {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  > a {
+    display: flex;
+    align-items: end;
+    cursor: pointer;
+    padding: var(--spacing-1) var(--spacing-2);
+
+    &:focus {
+      @include mixins.default-focus-style(
+        $box-shadow: inset 0 0 0 2px vars.$focus-color
+      );
+    }
+  }
+
+  .icon.close {
+    vertical-align: text-bottom;
+    text-shadow: vars.$text-shadow-light;
+  }
+
+  .page_name {
+    margin-right: var(--spacing-1);
+    text-shadow: vars.$text-shadow-light;
+  }
+
+  .page_language,
+  .page_site {
+    display: inline-block;
+    color: var(--color-text_muted);
+    font-size: var(--font-size_small);
+    margin-right: var(--spacing-1);
+  }
+
+  .page_language {
+    text-transform: uppercase;
+  }
+}

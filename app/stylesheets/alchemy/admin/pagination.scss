@@ -1,0 +1,94 @@
+@use "../variables" as vars;
+
+.pagination {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  background: vars.$light_gray;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  left: 0px;
+  height: vars.$pagination-height;
+  padding: var(--spacing-2);
+  padding-left: vars.$main-menu-width + 10px;
+  text-align: left;
+  border-top: vars.$default-border;
+  z-index: 10;
+
+  a,
+  span,
+  em {
+    font-size: vars.$default-font-size;
+    font-weight: bold;
+    color: var(--color-icon);
+    padding: var(--spacing-1);
+    margin: 0 var(--spacing-0);
+    border-radius: vars.$default-border-radius;
+  }
+
+  a:hover {
+    color: var(--color-text);
+    background-color: vars.$default-border-color;
+    text-decoration: none;
+  }
+
+  span a {
+    padding: 0;
+  }
+
+  .page {
+    padding: var(--spacing-1) var(--spacing-2);
+  }
+
+  .current {
+    color: var(--color-text);
+    background-color: vars.$default-border-color;
+    cursor: default;
+  }
+
+  .previous_page {
+    margin-right: var(--spacing-2);
+  }
+
+  .next_page {
+    margin-left: var(--spacing-2);
+  }
+
+  .disabled,
+  span {
+    color: #c0c0c0;
+  }
+
+  .gap {
+    border: none;
+    background: transparent;
+    cursor: default;
+    margin: 0;
+  }
+
+  .next_page,
+  .previous_page,
+  .first-page,
+  .last-page,
+  .gap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon {
+    fill: currentColor;
+  }
+}
+
+.per-page-select-form {
+  margin-left: auto;
+  display: inline;
+}
+
+#assign_image_list .pagination,
+#assign_file_list .pagination {
+  position: absolute;
+  padding-left: var(--spacing-2);
+}

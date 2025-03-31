@@ -2,7 +2,9 @@
 
 require "rails_helper"
 
-describe Admin::EventsController do
+RSpec.describe Alchemy::Admin::ResourcesController do
+  controller(Admin::EventsController) {}
+
   it "should include ResourcesHelper" do
     expect(controller.respond_to?(:resource_window_size)).to be_truthy
   end
@@ -75,7 +77,9 @@ describe Admin::EventsController do
           end
 
           it "returns records sorted by first attribute" do
-            get :index
+            Alchemy::Deprecation.silence do
+              get :index
+            end
             expect(assigns(:resources)).to eq([booking2, booking1])
           end
         end
@@ -98,8 +102,9 @@ describe Admin::EventsController do
       let!(:peter) { create(:series, name: "Peter") }
       let(:params) { {q: {name_cont: "some_query"}, page: 6} }
 
+      controller(Admin::SeriesController) {}
+
       it "redirects to index, keeping the current location parameters" do
-        expect(controller).to receive(:controller_path).twice { "admin/series" }
         post :update, params: {id: peter.id, series: {name: "Hans"}}.merge(params)
         expect(response.redirect_url).to eq("http://test.host/admin/series?page=6&q%5Bname_cont%5D=some_query")
       end
@@ -114,6 +119,17 @@ describe Admin::EventsController do
 
       it "sets 422 status" do
         expect(subject.status).to eq 422
+      end
+    end
+
+    describe "params security" do
+      subject { put :update, params: {id: peter.id, event: {name: "Fox", foo: "bar"}} }
+
+      it "only accepts editable attributes" do
+        expect_any_instance_of(Event).to receive(:update).with(
+          ActionController::Parameters.new(name: "Fox").permit!
+        )
+        subject
       end
     end
   end
@@ -132,10 +148,22 @@ describe Admin::EventsController do
     context "with zero plural noun model name" do
       let(:params) { {q: {name_cont: "some_query"}, page: 6} }
 
+      controller(Admin::SeriesController) {}
+
       it "redirects to index, keeping the current location parameters" do
-        expect(controller).to receive(:controller_path).twice { "admin/series" }
         post :create, params: {series: {name: "Hans"}}.merge(params)
         expect(response.redirect_url).to eq("http://test.host/admin/series?page=6&q%5Bname_cont%5D=some_query")
+      end
+    end
+
+    describe "params security" do
+      subject { post :create, params: {event: {name: "Fox", foo: "bar"}} }
+
+      it "only accepts editable attributes" do
+        expect(Event).to receive(:new).with(
+          ActionController::Parameters.new(name: "Fox").permit!
+        ).and_call_original
+        subject
       end
     end
   end
@@ -173,10 +201,29 @@ describe Admin::EventsController do
   describe "#common_search_filter_includes" do
     before do
       allow(controller).to receive(:alchemy_module) { {name: "events"} }
+      controller.send(:initialize_alchemy_filters)
     end
 
     it "should not be frozen" do
       expect(controller.send(:common_search_filter_includes)).to_not be_frozen
+    end
+  end
+
+  describe "legacy filters" do
+    let(:model) { Booking }
+    let(:controller_class) { Admin::BookingsController }
+    let(:controller) { controller_class.new }
+    let(:resource_handler) { controller_class.resource_handler }
+
+    before do
+      allow(controller).to receive(:alchemy_module) { {name: "bookings"} }
+      Alchemy::Deprecation.silence do
+        controller.send(:initialize_alchemy_filters)
+      end
+    end
+
+    it "should add filters from model" do
+      expect(controller_class.alchemy_filters.map(&:name)).to contain_exactly(:by_date, :future, :starting_today)
     end
   end
 end

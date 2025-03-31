@@ -90,7 +90,7 @@ module Alchemy
 
     acts_as_nested_set(dependent: :destroy, scope: [:layoutpage, :language_id])
 
-    stampable stamper_class_name: Alchemy.user_class.name
+    stampable stamper_class_name: Alchemy.user_class_name
 
     belongs_to :language
 
@@ -183,19 +183,6 @@ module Alchemy
         @_url_path_class = klass
       end
 
-      def alchemy_resource_filters
-        [
-          {
-            name: :by_page_layout,
-            values: PageLayout.all.map { |p| [Alchemy.t(p["name"], scope: "page_layout_names"), p["name"]] }
-          },
-          {
-            name: :status,
-            values: %w[published not_public restricted]
-          }
-        ]
-      end
-
       def searchable_alchemy_resource_attributes
         %w[name urlname title]
       end
@@ -257,7 +244,7 @@ module Alchemy
 
       def link_target_options
         options = [[Alchemy.t(:default, scope: "link_target_options"), ""]]
-        link_target_options = Config.get(:link_target_options)
+        link_target_options = Alchemy.config.get(:link_target_options)
         link_target_options.each do |option|
           # add an underscore to the options to provide the default syntax
           # @link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#target

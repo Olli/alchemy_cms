@@ -1,0 +1,325 @@
+@use "../extends";
+@use "../mixins";
+@use "../variables" as vars;
+
+.resources-header {
+  padding: 0 var(--spacing-2);
+}
+
+.resources-table-wrapper {
+  padding-bottom: 60px;
+
+  &.with_tag_filter {
+    width: calc(100% - 235px);
+    overflow-x: auto;
+  }
+}
+
+.selected_item_tools {
+  margin: calc(-1 * var(--spacing-2));
+  border-bottom: 1px solid vars.$default-border-color;
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-4);
+
+  .button {
+    vertical-align: middle;
+  }
+}
+
+.thumbnail_background {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 1px 1px vars.$default-border-color;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.picture_thumbnail {
+  --picture-thumbnail-border-radius: var(--border-radius_medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--picture-thumbnail-width);
+  height: var(--picture-thumbnail-height);
+  position: relative;
+  border-radius: var(--picture-thumbnail-border-radius);
+  padding: var(--spacing-2);
+  padding-bottom: 2.5em;
+  transition: all vars.$transition-duration;
+
+  img,
+  .thumbnail_background {
+    border-radius: var(--picture-thumbnail-border-radius);
+  }
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+
+    &:not([src*="alchemy/missing-image"]) {
+      background: vars.$thumbnail-background;
+    }
+
+    &[src*=".svg"]:not([src*="alchemy/missing-image"]) {
+      width: var(--picture-width);
+      max-height: var(--picture-height);
+    }
+  }
+
+  .picture_name {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    bottom: 0;
+    left: 0;
+    line-height: 2.5;
+    padding: 0 var(--spacing-1);
+    text-overflow: ellipsis;
+  }
+
+  &:hover,
+  &:focus-within {
+    .picture_tool,
+    .picture_tags {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+
+  &:hover,
+  &:focus-within,
+  &.active {
+    box-shadow: 0 0 4px 2px vars.$default-border-color;
+
+    .picture_tool.select {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+}
+
+#pictures,
+#overlay_picture_list {
+  --picture-width: 160px;
+  --picture-height: 120px;
+  --picture-thumbnail-width: calc(var(--picture-width) + var(--spacing-2));
+  --picture-thumbnail-height: calc(
+    var(--picture-height) + var(--spacing-2) + 2.5em
+  );
+
+  display: grid;
+  gap: var(--spacing-2);
+  grid-auto-rows: min-content;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--picture-thumbnail-width), auto)
+  );
+  justify-items: center;
+
+  &.picture-size--small {
+    --picture-width: 80px;
+    --picture-height: 60px;
+  }
+
+  &.picture-size--large {
+    --picture-width: 240px;
+    --picture-height: 180px;
+  }
+}
+
+#picture_archive {
+  overflow: visible;
+}
+
+#pictures {
+  .thumbnail_background {
+    @include mixins.zoom-in;
+  }
+}
+
+div.assign_image_list_image {
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+
+  img {
+    border-style: none;
+  }
+}
+
+.picture_tool {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  background-color: white;
+  top: var(--spacing-1);
+  padding: var(--spacing-0);
+  z-index: 10;
+  border-radius: vars.$default-border-radius;
+  box-shadow: 0 0 1px var(--color-grey_dark);
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  &.visible {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  &.hidden {
+    // Overwrite the `.hidden { display: none }` style
+    display: block;
+  }
+
+  &.select {
+    left: var(--spacing-1);
+
+    input {
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  &.delete {
+    cursor: pointer;
+    right: var(--spacing-1);
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+.picture_tags {
+  overflow: hidden;
+  position: absolute;
+  bottom: 28px;
+  left: 0;
+  width: 100%;
+  max-height: 80%;
+  padding: var(--spacing-1);
+  pointer-events: none;
+
+  .tag {
+    box-shadow: 0 0 2px 2px vars.$default-border-color;
+  }
+}
+
+.picture_tags,
+.picture_tool {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity vars.$transition-duration;
+}
+
+div#library_sidebar {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  border-left: 1px solid vars.$default-border-color;
+  top: 0;
+  right: 0;
+  width: 232px;
+
+  padding: calc(#{vars.$top-menu-height} + var(--spacing-2)) var(--spacing-4)
+    calc(#{vars.$pagination-height} + var(--spacing-2)) var(--spacing-4);
+  height: 100%;
+  z-index: 3;
+  background-color: var(--color-grey_very_light);
+
+  h2 {
+    margin-top: var(--spacing-4);
+  }
+
+  h3 {
+    margin: 1.5em 0 1em;
+  }
+}
+
+.alchemy-dialog #library_sidebar {
+  position: absolute;
+}
+
+.alchemy-dialog-body {
+  #library_sidebar {
+    padding: 0 var(--spacing-4);
+  }
+}
+
+#assign_image_list,
+#assign_file_list {
+  position: relative;
+  height: 558px;
+}
+
+#assign_image_list {
+  padding-right: 240px;
+  padding-bottom: 60px;
+}
+
+#overlay_picture_list {
+  height: 100%;
+  overflow: auto;
+
+  .picture_thumbnail:hover {
+    box-shadow: none;
+
+    .thumbnail_background {
+      box-shadow: 0 0 4px 4px vars.$default-border-color;
+    }
+  }
+}
+
+#overlay_file_list {
+  .assign_file_file {
+    display: block;
+    margin-bottom: var(--spacing-1);
+    word-break: break-all;
+
+    &:hover {
+      background-color: var(--color-yellow_light);
+    }
+  }
+
+  > ul {
+    margin: 0;
+    padding: var(--spacing-1) 0;
+
+    a {
+      @extend %text-overflow;
+      display: flex;
+      justify-content: space-between;
+      line-height: 25px;
+      text-decoration: none;
+      padding: var(--spacing-1) var(--spacing-2);
+    }
+
+    alchemy-icon {
+      margin-right: var(--spacing-2);
+      vertical-align: bottom;
+    }
+  }
+}
+
+#all_files td.name a {
+  @include mixins.zoom-in;
+}

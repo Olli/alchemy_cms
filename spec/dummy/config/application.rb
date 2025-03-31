@@ -12,7 +12,6 @@ require "action_view/railtie"
 require "active_job/railtie"
 # require "action_cable/engine"
 # require "rails/test_unit/railtie"
-require "sprockets/railtie"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -23,7 +22,7 @@ module Dummy
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     if config.respond_to?(:load_defaults)
-      config.load_defaults ENV["RAILS_VERSION"] || 7.2
+      config.load_defaults ENV["RAILS_VERSION"] || 8.0
     end
 
     # Settings in config/environments/* take precedence over those specified here.

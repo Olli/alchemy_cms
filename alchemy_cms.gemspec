@@ -33,24 +33,22 @@ Gem::Specification.new do |gem|
     activesupport
     railties
   ].each do |rails_gem|
-    gem.add_runtime_dependency rails_gem, [">= 7.0", "< 7.3"]
+    gem.add_runtime_dependency rails_gem, [">= 7.0", "< 8.1"]
   end
 
   gem.add_runtime_dependency "active_model_serializers", ["~> 0.10.14"]
   gem.add_runtime_dependency "acts_as_list", [">= 0.3", "< 2"]
   gem.add_runtime_dependency "awesome_nested_set", ["~> 3.1", ">= 3.7.0"]
   gem.add_runtime_dependency "cancancan", [">= 2.1", "< 4.0"]
-  gem.add_runtime_dependency "coffee-rails", [">= 4.0", "< 6.0"]
   gem.add_runtime_dependency "csv", ["~> 3.3"]
   gem.add_runtime_dependency "dragonfly", ["~> 1.4"]
   gem.add_runtime_dependency "dragonfly_svg", ["~> 0.0.4"]
   gem.add_runtime_dependency "gutentag", ["~> 2.2", ">= 2.2.1"]
-  gem.add_runtime_dependency "importmap-rails", ["~> 1.2", ">= 1.2.1"]
+  gem.add_runtime_dependency "importmap-rails", ["~> 2.0"]
   gem.add_runtime_dependency "kaminari", ["~> 1.1"]
   gem.add_runtime_dependency "originator", ["~> 3.1"]
   gem.add_runtime_dependency "ransack", [">= 1.8", "< 5.0"]
   gem.add_runtime_dependency "simple_form", [">= 4.0", "< 6"]
-  gem.add_runtime_dependency "sprockets-rails", [">= 3.5", "< 4"]
   gem.add_runtime_dependency "turbo-rails", [">= 1.4", "< 2.1"]
   gem.add_runtime_dependency "view_component", ["~> 3.0"]
 
@@ -61,7 +59,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "puma", ["~> 6.0"]
   gem.add_development_dependency "rails-controller-testing", ["~> 1.0"]
   gem.add_development_dependency "rspec-activemodel-mocks", ["~> 1.0"]
-  gem.add_development_dependency "rspec-rails", ["~> 6.1"]
+  gem.add_development_dependency "rspec-rails", ["~> 7.1"]
   gem.add_development_dependency "simplecov", ["~> 0.20"]
   gem.add_development_dependency "selenium-webdriver", ["~> 4.10"]
   gem.add_development_dependency "webmock", ["~> 3.3"]

@@ -56,6 +56,45 @@ RSpec.describe Alchemy::IngredientValidator do
 
       it { expect(ingredient.errors).to be_present }
     end
+
+    context "an element with email format validation" do
+      let(:element) { create(:alchemy_element, :with_ingredients, name: "contactform") }
+      let(:ingredient) { element.ingredient_by_role(:mail_from) }
+
+      context "and the value is matching" do
+        let(:value) { "my_email@example.com" }
+
+        it { expect(ingredient.errors).to be_blank }
+      end
+
+      context "and the value is not matching" do
+        let(:value) { "my_email@example" }
+
+        it { expect(ingredient.errors).to be_present }
+      end
+    end
+  end
+
+  context "an element with url format validation" do
+    let(:element) { create(:alchemy_element, :with_ingredients, name: "element_with_url") }
+    let(:ingredient) { element.ingredient_by_role(:url) }
+
+    before do
+      expect(ingredient).to receive(:value).at_least(:once) { value }
+      validate
+    end
+
+    context "with a slash" do
+      let(:value) { "www.example.com:80/about" }
+
+      it { expect(ingredient.errors).to be_blank }
+    end
+
+    context "and the value is not matching" do
+      let(:value) { 'www.example.com:80\/about' }
+
+      it { expect(ingredient.errors).to be_present }
+    end
   end
 
   context "with an ingredient having length validation" do

@@ -1,15 +1,16 @@
 # AlchemyCMS
 
-[![Build Status](https://github.com/AlchemyCMS/alchemy_cms/workflows/CI/badge.svg?branch=main)](https://github.com/AlchemyCMS/alchemy_cms/actions)
+[![Build & Test](https://github.com/AlchemyCMS/alchemy_cms/actions/workflows/build_test.yml/badge.svg)](https://github.com/AlchemyCMS/alchemy_cms/actions/workflows/build_test.yml)
 [![Brakeman Scan](https://github.com/AlchemyCMS/alchemy_cms/actions/workflows/brakeman-analysis.yml/badge.svg)](https://github.com/AlchemyCMS/alchemy_cms/actions/workflows/brakeman-analysis.yml)
+[![Lint](https://github.com/AlchemyCMS/alchemy_cms/actions/workflows/lint.yml/badge.svg)](https://github.com/AlchemyCMS/alchemy_cms/actions/workflows/lint.yml)
 
 [![Gem Version](https://badge.fury.io/rb/alchemy_cms.svg)](https://badge.fury.io/rb/alchemy_cms)
 [![codecov](https://codecov.io/gh/AlchemyCMS/alchemy_cms/graph/badge.svg?token=uUHQGfB2xe)](https://codecov.io/gh/AlchemyCMS/alchemy_cms)
-[![Lint](https://github.com/AlchemyCMS/alchemy_cms/actions/workflows/lint.yml/badge.svg)](https://github.com/AlchemyCMS/alchemy_cms/actions/workflows/lint.yml)
 [![Depfu](https://badges.depfu.com/badges/ebe56d2dd7b7044a8ae700cc81212a8e/overview.svg)](https://depfu.com/github/AlchemyCMS/alchemy_cms?project_id=4600)
 
 [![Backers on Open Collective](https://opencollective.com/alchemy_cms/backers/badge.svg?color=blue)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/alchemy_cms/sponsors/badge.svg?color=blue)](#sponsors)
+[![Open Source Helpers](https://www.codetriage.com/alchemycms/alchemy_cms/badges/users.svg)](https://www.codetriage.com/alchemycms/alchemy_cms)
 
 <img src="./app/assets/images/alchemy/alchemy-logo.svg" width=300>
 
@@ -245,7 +246,7 @@ $ bin/rake alchemy:upgrade
 Alchemy will print out useful information after running the automated tasks that help a smooth upgrade path.
 So please **take your time and read them**.
 
-Always be sure to keep an eye on the `config/alchemy/config.yml.defaults` file and update your `config/alchemy/config.yml` accordingly.
+Always be sure to keep an eye on the output of your Rails app when starting. There will probably be useful information about deprecations.
 
 Also, `git diff` is your friend.
 
@@ -341,24 +342,45 @@ $ bin/start
 
 ## 📦 Releasing
 
-### Bump version
+### 🤖 Automated (recommended)
+
+There is a Rake task that helps you to release a new version of Alchemy.
+
+```bash
+$ bundle exec rake alchemy:release
+```
+
+> [!NOTE]
+> This will release a new patch level
+
+If you want to release a new minor or major version you can do so by setting the `VERSION` environment variable accordingly.
+
+```bash
+$ bundle exec rake alchemy:release VERSION=X.Y.Z
+```
+
+### 👷🏽‍♀️ Manual
+
+If something goes wrong with the automated release task you can still release a new version manually.
+
+#### 1. Bump version
 
 Bump the version number in `lib/alchemy/version.rb`.
 
-### Update the changelog
+#### 2. Update the changelog
 
 ```bash
 $ export GITHUB_ACCESS_TOKEN=...
 $ PREVIOUS_VERSION=4.1.0 bundle exec rake alchemy:changelog:update
 ```
 
-### Commit version bump
+#### 3. Commit version bump
 
 ```bash
 $ git commit -am "Bump version to vX.Y.Z"
 ```
 
-### Release a new version
+#### 4. Release a new version
 
 This task will publish the ruby gem.
 It also tags the latest commit.

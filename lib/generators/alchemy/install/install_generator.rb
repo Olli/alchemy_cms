@@ -53,35 +53,24 @@ module Alchemy
         install_tasks.inject_routes(options[:auto_accept])
       end
 
-      def copy_config
-        copy_file "#{gem_config_path}/config.yml", app_config_path.join("alchemy", "config.yml")
-      end
-
       def copy_yml_files
         %w[elements page_layouts menus].each do |file|
           template "#{__dir__}/templates/#{file}.yml.tt", app_config_path.join("alchemy", "#{file}.yml")
         end
       end
 
+      def copy_config_rb
+        template "#{__dir__}/templates/alchemy.rb.tt", app_config_path.join("initializers", "alchemy.rb")
+      end
+
       def install_assets
-        copy_file "all.js", app_vendor_assets_path.join("javascripts", "alchemy", "admin", "all.js")
         copy_file "custom.css", app_assets_path.join("stylesheets/alchemy/admin/custom.css")
-        append_to_file Rails.root.join("app/assets/config/manifest.js"), "//= link alchemy/admin/custom.css\n"
       end
 
       def copy_demo_views
         return if options[:skip_demo_files]
 
         copy_file "application.html.erb", app_views_path.join("layouts", "application.html.erb")
-        copy_file "article.css", app_assets_path.join("stylesheets", "alchemy", "elements", "_article.css")
-
-        stylesheet_require = %(@import "alchemy/elements/article";\n)
-        if File.exist?(app_assets_path.join("stylesheets", "application.css"))
-          prepend_file app_assets_path.join("stylesheets", "application.css"), stylesheet_require
-        else
-          create_file app_assets_path.join("stylesheets", "application.css"), stylesheet_require
-        end
-
         copy_file "_article.html.erb", app_views_path.join("alchemy", "elements", "_article.html.erb")
         copy_file "_standard.html.erb", app_views_path.join("alchemy", "page_layouts", "_standard.html.erb")
         copy_file "alchemy.en.yml", app_config_path.join("locales", "alchemy.en.yml")

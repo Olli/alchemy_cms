@@ -1,0 +1,127 @@
+@use "../mixins";
+@use "../variables" as vars;
+
+button,
+input[type="submit"],
+a.button,
+input.button {
+  position: relative;
+  @include mixins.button-defaults;
+
+  &.secondary {
+    background-color: vars.$secondary-button-bg-color;
+    color: vars.$secondary-button-text-color;
+    border-color: vars.$secondary-button-border-color;
+
+    &:focus {
+      @include mixins.default-focus-style(
+        $border-color: vars.$button-focus-border-color,
+        $box-shadow: vars.$button-focus-box-shadow
+      );
+    }
+
+    &:active,
+    &:active:focus {
+      border-color: vars.$button-hover-border-color;
+      box-shadow: none;
+    }
+  }
+
+  &.small {
+    padding: vars.$small-button-padding;
+    line-height: var(--spacing-4);
+    font-size: inherit;
+  }
+
+  &.with_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    .icon {
+      font-weight: normal;
+      margin-right: var(--spacing-1);
+      fill: currentColor;
+    }
+  }
+
+  &[disabled] {
+    cursor: not-allowed;
+  }
+}
+
+.icon_button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: vars.$icon-button-width;
+  height: vars.$icon-button-height;
+  margin: 0;
+  padding: 0;
+  text-shadow: none;
+  border-radius: vars.$default-border-radius;
+
+  &.small {
+    width: vars.$icon-button-small-width;
+    height: vars.$icon-button-small-height;
+    background: none;
+    border: none;
+    padding: 0; // button.small has padding
+  }
+
+  &.active,
+  &:active,
+  &:hover:not([disabled]):not(.disabled):not(.linked) {
+    text-decoration: none;
+    background-color: vars.$default-border-color;
+    cursor: pointer;
+  }
+
+  .icon {
+    transition: fill 250ms;
+  }
+
+  &.disabled,
+  &[disabled] {
+    pointer-events: none;
+
+    svg {
+      opacity: 0.3;
+    }
+
+    &:hover {
+      text-decoration: none;
+      cursor: default;
+    }
+  }
+
+  &.linked {
+    @include mixins.linked-button;
+  }
+
+  &:focus:not(.disabled):not([disabled]) {
+    @include mixins.default-focus-style;
+  }
+
+  .spinner {
+    position: static;
+    transform: none;
+  }
+}
+
+button.icon_button {
+  background: transparent;
+  border: 0 none;
+  box-shadow: none;
+  font-weight: normal;
+
+  &:disabled,
+  &.disabled {
+    background: transparent;
+  }
+}
+
+#new_element button.button {
+  float: right;
+}

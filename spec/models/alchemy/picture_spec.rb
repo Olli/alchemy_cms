@@ -56,6 +56,12 @@ module Alchemy
       expect(picture).not_to be_valid
     end
 
+    it "is not valid with an invalid image file" do
+      picture = build(:alchemy_picture, image_file_format: "pdf")
+      expect(picture).to_not be_valid
+      expect(picture.errors[:image_file]).to include("This is not an valid image.")
+    end
+
     it "is valid with capitalized image file extension" do
       image_file = File.new(File.expand_path("../../fixtures/image2.PNG", __dir__))
       picture = Picture.new(image_file: image_file)
@@ -75,7 +81,7 @@ module Alchemy
 
       context "with > geometry string" do
         before do
-          allow(Config).to receive(:get) do |arg|
+          allow(Alchemy.config).to receive(:get) do |arg|
             if arg == :preprocess_image_resize
               "10x10>"
             end
@@ -90,7 +96,7 @@ module Alchemy
 
       context "without > geometry string" do
         before do
-          allow(Config).to receive(:get) do |arg|
+          allow(Alchemy.config).to receive(:get) do |arg|
             if arg == :preprocess_image_resize
               "10x10"
             end
@@ -143,25 +149,6 @@ module Alchemy
       end
     end
 
-    describe ".alchemy_resource_filters" do
-      context "with image file formats" do
-        let!(:picture) { create(:alchemy_picture, image_file_format: "png") }
-
-        it "returns a list of filters with image file formats" do
-          expect(Alchemy::Picture.alchemy_resource_filters).to eq([
-            {
-              name: :by_file_format,
-              values: ["png"]
-            },
-            {
-              name: :misc,
-              values: %w[recent last_upload without_tag deletable]
-            }
-          ])
-        end
-      end
-    end
-
     describe ".last_upload" do
       it "should return all pictures that have the same upload-hash as the most recent picture" do
         other_upload = Picture.create!(image_file: image_file, upload_hash: "456")
@@ -191,6 +178,21 @@ module Alchemy
 
       it "should not return old pictures" do
         expect(Picture.recent).not_to include(@old_picture)
+      end
+    end
+
+    describe ".file_formats" do
+      let!(:picture1) { create(:alchemy_picture, name: "Ping", image_file_format: "png") }
+      let!(:picture2) { create(:alchemy_picture, name: "Jay Peg", image_file_format: "jpeg") }
+
+      it "should return all picture file formats" do
+        expect(Picture.file_formats).to match_array(%w[jpeg png])
+      end
+
+      context "with a scope" do
+        it "should only return scoped picture file formats" do
+          expect(Picture.file_formats(Picture.where(name: "Jay Peg"))).to eq(["jpeg"])
+        end
       end
     end
 

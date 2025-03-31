@@ -8,6 +8,7 @@ import "alchemy_admin/components/dialog_link"
 import "alchemy_admin/components/dom_id_select"
 import "alchemy_admin/components/element_editor"
 import "alchemy_admin/components/elements_window"
+import "alchemy_admin/components/elements_window_handle"
 import "alchemy_admin/components/list_filter"
 import "alchemy_admin/components/message"
 import "alchemy_admin/components/growl"
@@ -23,3 +24,19 @@ import "alchemy_admin/components/select"
 import "alchemy_admin/components/spinner"
 import "alchemy_admin/components/tags_autocomplete"
 import "alchemy_admin/components/tinymce"
+
+await Promise.race([
+  // Load all global custom elements
+  Promise.allSettled([
+    customElements.whenDefined("alchemy-button"),
+    customElements.whenDefined("alchemy-icon"),
+    customElements.whenDefined("alchemy-growl"),
+    customElements.whenDefined("alchemy-message"),
+    customElements.whenDefined("alchemy-spinner")
+  ]),
+  // Resolve after two seconds
+  new Promise((resolve) => setTimeout(resolve, 1250))
+])
+
+// Remove the class, showing the page content
+document.documentElement.classList.remove("loading-custom-elements")

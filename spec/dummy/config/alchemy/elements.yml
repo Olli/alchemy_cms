@@ -67,7 +67,7 @@
     - role: mail_from
       type: Text
       validate:
-        - presence
+        - format: email
     - role: mail_to
       type: Text
       validate:
@@ -125,6 +125,16 @@
       type: Boolean
       hint: true
       default: true
+    - role: number
+      type: Number
+      hint: true
+      default: 0.6
+      settings:
+        min: 0
+        max: 10
+        step: 0.1
+        unit: "cm"
+        input_type: number
     - role: datetime
       type: Datetime
       hint: true
@@ -263,3 +273,10 @@
 
 - name: element_with_warning
   warning: "Do not use this element!"
+
+- name: element_with_url
+  ingredients:
+    - role: url
+      type: Text
+      validate:
+        - format: url

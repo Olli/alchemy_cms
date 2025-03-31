@@ -28,7 +28,7 @@ module Alchemy
     #
     # @option options format [String]
     #   The format the picture should be rendered in.
-    #   Defaults to the +image_output_format+ from the +Alchemy::Config+.
+    #   Defaults to the +image_output_format+ from the +Alchemy.config+.
     #
     # @option options crop [Boolean]
     #   If set to true the picture will be cropped to fit the size value.
@@ -102,11 +102,10 @@ module Alchemy
 
     # Show image cropping link for ingredient
     def allow_image_cropping?
-      settings[:crop] && picture &&
-        picture.can_be_cropped_to?(
-          settings[:size],
-          settings[:upsample]
-        ) && !!picture.image_file
+      settings[:crop] && picture&.can_be_cropped_to?(
+        settings[:size],
+        settings[:upsample]
+      ) && !!picture.image_file
     end
 
     private

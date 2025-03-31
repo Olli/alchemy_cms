@@ -4,8 +4,13 @@ en:
       event:
         start:
           name: Start
-        by_location_name:
+        by_location_id:
           name: Location
+        by_timeframe:
+          name: By Timeframe
+          values:
+            starting_today: Starting Today
+            future: Future
     element_names:
       gallery_picture: Gallery picture
     ingredient_roles:
@@ -18,6 +23,8 @@ en:
       richtext: Richtext
       select: Select
       text: Text
+    page_layout_names:
+      standard: Standard
     element_hints:
       all_you_can_eat: This element shows all ingredient types and settings of an Element Alchemy comes with in a default installation.
     ingredient_hints:
@@ -26,6 +33,7 @@ en:
       file: This ingredient type represents a downloadable file
       html: This ingredient type represents raw HTML output
       link: This ingredient type represents a link
+      number: This ingredient type represents a number
       picture: This ingredient type represents a picture
       richtext: This ingredient type represents richtext
       select: This ingredient type represents values the editor can choose from

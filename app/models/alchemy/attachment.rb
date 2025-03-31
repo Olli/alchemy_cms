@@ -28,7 +28,7 @@ module Alchemy
       after_assign { |f| write_attribute(:file_mime_type, f.mime_type) }
     end
 
-    stampable stamper_class_name: Alchemy.user_class.name
+    stampable stamper_class_name: Alchemy.user_class_name
 
     has_many :file_ingredients,
       class_name: "Alchemy::Ingredients::File",
@@ -58,19 +58,6 @@ module Alchemy
         @_url_class = klass
       end
 
-      def alchemy_resource_filters
-        [
-          {
-            name: :by_file_type,
-            values: distinct.pluck(:file_mime_type).map { |type| [Alchemy.t(type, scope: "mime_types"), type] }.sort_by(&:first)
-          },
-          {
-            name: :misc,
-            values: %w[recent last_upload without_tag]
-          }
-        ]
-      end
-
       def last_upload
         last_id = Attachment.maximum(:id)
         return Attachment.all unless last_id
@@ -82,18 +69,24 @@ module Alchemy
         %w[name file_name]
       end
 
+      def file_types(scope = all)
+        scope.reorder(:file_mime_type).distinct.pluck(:file_mime_type)
+          .map { [Alchemy.t(_1, scope: "mime_types"), _1] }
+          .sort_by(&:first)
+      end
+
       def allowed_filetypes
-        Config.get(:uploader).fetch("allowed_filetypes", {}).fetch("alchemy/attachments", [])
+        Alchemy.config.get(:uploader).fetch("allowed_filetypes", {}).fetch("alchemy/attachments", [])
+      end
+
+      def ransackable_scopes(_auth_object = nil)
+        %i[by_file_type recent last_upload without_tag]
       end
     end
 
     validates_presence_of :file
-    validates_size_of :file, maximum: Config.get(:uploader)["file_size_limit"].megabytes
-    validates_property :ext,
-      of: :file,
-      in: allowed_filetypes,
-      case_sensitive: false,
-      message: Alchemy.t("not a valid file"),
+    validates_size_of :file, maximum: Alchemy.config.get(:uploader)["file_size_limit"].megabytes
+    validate :file_type_allowed,
       unless: -> { self.class.allowed_filetypes.include?("*") }
 
     before_save :set_name, if: :file_name_changed?
@@ -155,6 +148,13 @@ module Alchemy
     end
 
     private
+
+    def file_type_allowed
+      symbol = Mime::Type.lookup(file_mime_type)&.symbol&.to_s.presence
+      unless symbol&.in?(self.class.allowed_filetypes)
+        errors.add(:image_file, Alchemy.t("not a valid file"))
+      end
+    end
 
     def set_name
       self.name = convert_to_humanized_name(file_name, file.ext)

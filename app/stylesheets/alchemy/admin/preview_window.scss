@@ -1,0 +1,35 @@
+@use "../variables" as vars;
+
+:root {
+  --preview-window-min-width: 0px;
+
+  @media screen and (min-width: vars.$large-screen-break-point) {
+    --preview-window-min-width: 240px;
+  }
+}
+
+#alchemy_preview_window {
+  position: absolute;
+  left: var(--main-menu-width);
+  top: 75px;
+  width: calc(
+    100vw - var(--main-menu-width) - var(--elements-window-width) +
+      var(--border-width_small)
+  );
+  min-width: var(--preview-window-min-width);
+  max-width: calc(100vw - var(--main-menu-width));
+  height: calc(100vh - #{vars.$top-menu-height});
+  border: 0 none;
+  background: #fff;
+  border-right: vars.$default-border;
+  transition-duration: vars.$transition-duration;
+  transition-timing-function: vars.$transition-duration;
+  transition-property: width max-width;
+
+  .elements-window-visible & {
+    max-width: calc(
+      100vw - var(--main-menu-width) - var(--elements-window-min-width) +
+        var(--border-width_small)
+    );
+  }
+}
