@@ -89,6 +89,7 @@ en:
       image/tiff: TIFF Image
       image/x-psd: Photoshop File
       image/svg+xml: SVG Image
+      image/webp: WebP Image
       text/plain: Plain Text Document
       text/x-vcard: vCard
       video/mp4: MPEG-4 Video
@@ -104,8 +105,10 @@ en:
     filters:
       page:
         by_page_layout:
+          all: All page types
           name: Page Type
         status:
+          all: Do not filter
           name: Status
           values:
             not_public: Unpublished
@@ -117,10 +120,16 @@ en:
           name: Published
         restricted:
           name: Restricted
+        updated_at_lteq:
+          name: Updated before
+        updated_at_gteq:
+          name: Updated after
       picture:
         by_file_format:
+          all: Show all file types
           name: File Type
           values:
+            <<: *mime_types
             gif: GIF Image
             jpeg: JPG Image
             png: PNG Image
@@ -134,18 +143,21 @@ en:
         without_tag:
           name: Without tag
         deletable:
-          name: Not linked by file content
+          name: Not used
       attachment:
         by_file_type:
           name: File Type
           values:
             <<: *mime_types
+          all: Show all file types
         last_upload:
           name: Last upload only
         recent:
           name: Recently uploaded only
         without_tag:
           name: Without tag
+        deletable:
+          name: Not used
 
     default_ingredient_texts:
       lorem: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
@@ -214,6 +226,11 @@ en:
       elements:
         toolbar:
           hide: Hide
+      pictures:
+        sorting_select:
+          label: "Sorting"
+          by_latest: "Latest"
+          alphabetical: "A-Z"
     add_nested_element: "Add %{name}"
     anchor: "Anchor"
     anchor_link_headline: You can link to an anchor from the current page.
@@ -323,7 +340,6 @@ en:
     "Size": "Size"
     "Successfully deleted element": "Successfully deleted %{element}"
     "Tags": "Tags"
-    "These pictures could not be deleted, because they were in use": "These pictures could not be deleted, because they were in use: %{names}"
     "This page is locked": "This page is currently locked by %{name}"
     "Title": "Title"
     "Trash": "Trash"
@@ -551,6 +567,7 @@ en:
     password: "Password"
     paste: "paste"
     pictures_in_page: "%{page} in %{pictures}"
+    pictures_will_be_deleted_now: Pictures will be deleted now
     place_link: "Add link"
     player_version: "Flash Player version"
     "please enter subject and mail address": "Please enter recipient and subject."
@@ -611,6 +628,12 @@ en:
     tag_list: Tags
     tags_get_created_if_used_the_first_time: "Tags get created if used the first time."
     this_picture_is_used_on_these_pages: "This picture is used on following pages"
+    used_on_these_pages:
+      attachment: "This file is used on following pages"
+      picture: "This picture is used on following pages"
+    not_in_use_yet:
+      attachment: "This file is not in use yet."
+      picture: "This picture is not in use yet."
     title: "Title"
     to_alchemy: "To Alchemy"
     unknown: "unknown"
@@ -688,7 +711,7 @@ en:
   time:
     formats:
       alchemy:
-        default: "%m.%d.%Y %H:%M"
+        default: "%Y-%m-%d %H:%M"
         ingredient_date: "%Y-%m-%d"
         page_status: "%m.%d.%Y %H:%M"
         short_datetime: "%d %b %H:%M"
@@ -763,16 +786,19 @@ en:
               node_ingredients_present: "This menu item is in use inside an Alchemy element on the following pages: %{page_names}."
         alchemy/site:
           attributes:
-            languages:
-              still_present: "are still attached to this site. Please remove them first."
+            base:
+              restrict_dependent_destroy:
+                has_many: "There are still %{record} attached to this site. Please remove them first."
         alchemy/language:
           attributes:
-            pages:
-              still_present: "are still attached to this language. Please remove them first."
+            base:
+              restrict_dependent_destroy:
+                has_many: "There are still %{record} attached to this language. Please remove them first."
         alchemy/page:
           attributes:
-            nodes:
-              still_present: "are still attached to this page. Please remove them first."
+            base:
+              restrict_dependent_destroy:
+                has_many: "There are still %{record} attached to this page. Please remove them first."
     models:
       gutentag/tag:
         one: Tag
@@ -859,6 +885,7 @@ en:
         public: "Public"
         locale: Localization
         code: ISO Code
+        nodes: Menu nodes
       alchemy/legacy_page_url:
         urlname: "URL-Path"
       alchemy/node:
@@ -877,6 +904,7 @@ en:
         meta_description: "Description"
         meta_keywords: "Keywords"
         name: "Name"
+        nodes: "Menu nodes"
         page_layout: "Page type"
         public: "public"
         restricted: "restricted"

@@ -1,6 +1,8 @@
 import { reloadPreview } from "alchemy_admin/components/preview_window"
+import { removeTab } from "alchemy_admin/fixed_elements"
 import { closeCurrentDialog } from "alchemy_admin/dialog"
 import IngredientAnchorLink from "alchemy_admin/ingredient_anchor_link"
+import pleaseWaitOverlay from "alchemy_admin/please_wait_overlay"
 
 class Action extends HTMLElement {
   constructor() {
@@ -13,7 +15,11 @@ class Action extends HTMLElement {
       // we don't have to implicitly close the dialog
       closeCurrentDialog,
       reloadPreview,
-      updateAnchorIcon: IngredientAnchorLink.updateIcon
+      removeFixedElement: removeTab,
+      updateAnchorIcon: IngredientAnchorLink.updateIcon,
+      hidePleaseWaitOverlay() {
+        pleaseWaitOverlay(false)
+      }
     }
   }
 
@@ -25,6 +31,8 @@ class Action extends HTMLElement {
     } else {
       console.error(`Unknown Alchemy action: ${this.name}`)
     }
+
+    this.remove()
   }
 
   get name() {

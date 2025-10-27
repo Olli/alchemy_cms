@@ -1,6 +1,37 @@
 @use "base";
 @use "../mixins";
-@use "../variables" as vars;
+
+.resource-details {
+  display: flex;
+  gap: var(--spacing-5);
+  --form-left-column-width: 30%;
+  --form-right-column-width: 70%;
+
+  > .resource-preview {
+    flex-grow: 0;
+    width: 50%;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  aside {
+    flex-grow: 1;
+  }
+
+  .resource_info {
+    margin-bottom: var(--spacing-4);
+  }
+}
+
+.resource-preview {
+  iframe {
+    width: 100%;
+    background-color: white;
+    min-height: 565px;
+  }
+}
 
 .resource_info {
   .value {
@@ -12,8 +43,15 @@
     }
 
     > p {
-      @include mixins.form-value-display;
-      @include mixins.truncate(vars.$form-right-width);
+      float: right;
+      width: var(--form-right-column-width);
+      margin: var(--form-field-margin);
+      padding: var(--spacing-1) var(--spacing-2);
+      line-height: 21px;
+      min-height: var(--form-field-height);
+      background: var(--form-field-background-color);
+      border-radius: var(--border-radius_medium);
+      @include mixins.truncate(var(--form-right-column-width));
     }
 
     &.with-icon {
@@ -31,16 +69,80 @@
     position: absolute;
     right: 0;
     top: var(--spacing-1);
-    height: vars.$form-field-height;
-    background-color: var(--color-grey_light);
+    height: var(--form-field-height);
+    background-color: var(--form-field-addon-background-color);
     padding: 0 var(--spacing-2);
     transition: background-color 0.3s;
     @extend .right-rounded-border;
 
     &:hover {
       cursor: pointer;
-      background-color: hsl(0deg, 0%, 84%);
+      background-color: var(--icon-button-hover-bg-color);
       text-decoration: none;
+    }
+  }
+
+  &.file-infos .value {
+    label {
+      text-align: left;
+      width: 30%;
+    }
+
+    p {
+      max-width: 70%;
+      width: 70%;
+    }
+  }
+}
+
+.file-infos,
+.resource-usage-info {
+  margin-top: var(--spacing-4);
+
+  alchemy-message {
+    margin: var(--spacing-5) 0;
+  }
+
+  h3 {
+    font-size: 1rem;
+  }
+}
+
+.resource_page_list {
+  padding-left: 0;
+  list-style-type: none;
+
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    padding: var(--spacing-1) var(--spacing-2) 0;
+    margin: 0;
+  }
+
+  .list {
+    margin: var(--spacing-2) 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-1);
+      padding: var(--spacing-2);
+      border-radius: var(--border-radius_medium);
+      white-space: normal;
+      margin-bottom: 1em;
+    }
+  }
+
+  p {
+    margin: 0;
+  }
+
+  a {
+    color: var(--text-color);
+
+    &:hover {
+      color: var(--text-link-color);
     }
   }
 }

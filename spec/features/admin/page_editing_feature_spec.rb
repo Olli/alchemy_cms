@@ -30,10 +30,8 @@ RSpec.describe "Page editing feature", type: :system do
     end
 
     describe "multiple preview sources", :js do
-      around do |example|
-        Alchemy.preview_sources << FooPreviewSource
-        example.run
-        Alchemy.instance_variable_set(:@_preview_sources, nil)
+      before do |example|
+        stub_alchemy_config(preview_sources: [Alchemy::Admin::PreviewUrl, FooPreviewSource])
       end
 
       it "show as select" do
@@ -92,7 +90,7 @@ RSpec.describe "Page editing feature", type: :system do
 
         context "with sitemaps show_flag config option set to true" do
           before do
-            stub_alchemy_config(:sitemap, {"show_flag" => true})
+            stub_alchemy_config(sitemap: {show_flag: true})
           end
 
           it "should show sitemap checkbox" do
@@ -103,7 +101,7 @@ RSpec.describe "Page editing feature", type: :system do
 
         context "with sitemaps show_flag config option set to false" do
           before do
-            stub_alchemy_config(:sitemap, {"show_flag" => false})
+            stub_alchemy_config(sitemap: {show_flag: false})
           end
 
           it "should not show sitemap checkbox" do

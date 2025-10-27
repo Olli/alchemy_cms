@@ -4,10 +4,7 @@ require "rails_helper"
 
 describe "alchemy/admin/pictures/show.html.erb" do
   let(:image) do
-    fixture_file_upload(
-      File.expand_path("../../../fixtures/animated.gif", __dir__),
-      "image/gif"
-    )
+    fixture_file_upload("animated.gif")
   end
 
   let(:picture) do
@@ -32,6 +29,7 @@ describe "alchemy/admin/pictures/show.html.erb" do
     allow(view).to receive(:admin_picture_path).and_return("/path")
     allow(view).to receive(:edit_admin_page_path).and_return("/path")
     allow(view).to receive(:render_message)
+    allow(view).to receive(:description_field_name_prefix) { "prefix" }
     allow(view).to receive(:search_filter_params) { {} }
     view.extend Alchemy::Admin::FormHelper
     view.extend Alchemy::BaseHelper
@@ -60,11 +58,11 @@ describe "alchemy/admin/pictures/show.html.erb" do
     let!(:picture_ingredient) { create(:alchemy_ingredient_picture, picture: picture) }
 
     it "displays a list of ingredients using the picture" do
-      assign(:assignments, picture.picture_ingredients.joins(element: :page))
+      assign(:assignments, picture.related_ingredients.joins(element: :page))
 
       render
 
-      expect(rendered).to have_css("#pictures_page_list .list")
+      expect(rendered).to have_css(".resource_page_list .list")
       expect(rendered).to have_content Alchemy::IngredientEditor.new(picture_ingredient).translated_role
     end
   end

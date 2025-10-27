@@ -1,4 +1,3 @@
-@use "custom-properties";
 @use "defaults";
 @use "fonts";
 @use "admin/archive";
@@ -10,6 +9,7 @@
 @use "admin/dashboard";
 @use "admin/dialogs";
 @use "admin/elements";
+@use "admin/element-select";
 @use "admin/errors";
 @use "admin/filters";
 @use "admin/flash";

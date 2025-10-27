@@ -2,21 +2,6 @@
 
 require "rails_helper"
 
-RSpec.shared_examples :redirecting_to_picture_library do
-  let(:params) do
-    {
-      page: 2,
-      q: {name_or_image_file_name_cont: "kitten", last_upload: true},
-      size: "small",
-      tagged_with: "cat"
-    }
-  end
-
-  it "redirects to index keeping all query, filter and page params" do
-    is_expected.to redirect_to admin_pictures_path(params)
-  end
-end
-
 module Alchemy
   describe Admin::PicturesController do
     routes { Alchemy::Engine.routes }
@@ -27,13 +12,42 @@ module Alchemy
 
     let!(:language) { create(:alchemy_language) }
 
+    let(:search_params) do
+      if Alchemy.storage_adapter.dragonfly?
+        {
+          name_or_image_file_name_cont: "kitten",
+          last_upload: true
+        }
+      elsif Alchemy.storage_adapter.active_storage?
+        {
+          name_or_image_file_blob_filename_cont: "kitten",
+          last_upload: true
+        }
+      end
+    end
+
+    shared_examples :redirecting_to_picture_library do
+      let(:params) do
+        {
+          page: 2,
+          q: search_params,
+          size: "small",
+          tagged_with: "cat"
+        }
+      end
+
+      it "redirects to index keeping all query, filter and page params" do
+        is_expected.to redirect_to admin_pictures_path(params)
+      end
+    end
+
     describe "#index" do
       context "with search params" do
-        let!(:picture_1) { create(:alchemy_picture, name: "cute kitten") }
-        let!(:picture_2) { create(:alchemy_picture, name: "nice beach") }
+        let!(:picture_1) { create(:alchemy_picture, name: "cute kitten", upload_hash: "123") }
+        let!(:picture_2) { create(:alchemy_picture, name: "nice beach", upload_hash: "123") }
 
         it "assigns @pictures with filtered pictures" do
-          get :index, params: {q: {name_or_image_file_name_cont: "kitten"}}
+          get :index, params: {q: search_params}
           expect(assigns(:pictures)).to include(picture_1)
           expect(assigns(:pictures)).to_not include(picture_2)
         end
@@ -109,14 +123,9 @@ module Alchemy
 
       context "when params[:form_field_id]" do
         context "is set" do
-          it "for html requests it renders the archive_overlay partial" do
+          it "it renders the archive_overlay partial" do
             get :index, params: {form_field_id: "element_1_ingredient_1_picture_id"}
             expect(response).to render_template(partial: "_archive_overlay")
-          end
-
-          it "for ajax requests it renders the archive_overlay template" do
-            get :index, params: {form_field_id: "element_1_ingredient_1_picture_id"}, xhr: true
-            expect(response).to render_template(:archive_overlay)
           end
         end
 
@@ -158,7 +167,7 @@ module Alchemy
     end
 
     describe "#show" do
-      let(:picture) { create(:alchemy_picture, name: "kitten") }
+      let!(:picture) { create(:alchemy_picture, name: "kitten") }
 
       it "assigns @picture" do
         get :show, params: {id: picture.id}
@@ -180,8 +189,8 @@ module Alchemy
         let!(:previous) { create(:alchemy_picture, name: "abraham") }
 
         it "assigns @previous to previous picture" do
-          get :show, params: {id: picture.id}
-          expect(assigns(:previous).id).to eq(previous.id)
+          get :show, params: {id: :previous, picture_index: 2}
+          expect(assigns(:previous)).to eq(1)
         end
       end
 
@@ -189,8 +198,8 @@ module Alchemy
         let!(:next_picture) { create(:alchemy_picture, name: "zebra") }
 
         it "assigns @next to next picture" do
-          get :show, params: {id: picture.id}
-          expect(assigns(:next).id).to eq(next_picture.id)
+          get :show, params: {id: :next, picture_index: 1}
+          expect(assigns(:next)).to eq(2)
         end
       end
     end
@@ -295,7 +304,9 @@ module Alchemy
     end
 
     describe "#delete_multiple" do
-      subject { delete :delete_multiple, params: {picture_ids: picture_ids} }
+      subject do
+        delete :delete_multiple, params: {picture_ids: picture_ids}
+      end
 
       it_behaves_like :redirecting_to_picture_library do
         let(:subject) do
@@ -305,12 +316,8 @@ module Alchemy
         end
       end
 
-      let(:deletable_picture) do
-        mock_model("Picture", name: "pic of the pig", deletable?: true)
-      end
-
-      let(:not_deletable_picture) do
-        mock_model("Picture", name: "pic of the chick", deletable?: false)
+      let(:picture) do
+        build_stubbed(:alchemy_picture)
       end
 
       context "no picture_ids given" do
@@ -323,49 +330,12 @@ module Alchemy
       end
 
       context "picture_ids given" do
-        context "all are deletable" do
-          let(:picture_ids) { deletable_picture.id.to_s }
+        let(:picture_ids) { [picture.id] }
 
-          before do
-            allow(Picture).to receive(:find).and_return([deletable_picture])
-          end
-
-          it "should delete the pictures give a notice about deleting them" do
-            subject
-            expect(flash[:notice]).to match("successfully")
-          end
-        end
-
-        context "deletable and not deletable" do
-          let(:picture_ids) { "#{deletable_picture.id},#{not_deletable_picture.id}" }
-
-          before do
-            allow(Picture).to receive(:find).and_return([deletable_picture, not_deletable_picture])
-          end
-
-          it "should give a warning for the non deletable pictures and delete the others" do
-            expect(deletable_picture).to receive(:destroy)
-            subject
-            expect(flash[:warn]).to match("could not be deleted")
-          end
-        end
-
-        context "with error happening" do
-          let(:picture_ids) { deletable_picture.id.to_s }
-
-          before do
-            expect(Picture).to receive(:find).and_raise("yada")
-          end
-
-          it "sets error message" do
-            subject
-            expect(flash[:error]).not_to be_blank
-          end
-
-          it "redirects to index" do
-            subject
-            expect(response).to redirect_to admin_pictures_path
-          end
+        it "enqueues the picture delete job" do
+          subject
+          expect(DeletePictureJob).to have_been_enqueued.with(picture.id.to_s)
+          expect(flash[:notice]).to match("Pictures will be deleted now")
         end
       end
     end

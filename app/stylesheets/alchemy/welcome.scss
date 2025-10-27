@@ -1,19 +1,18 @@
 @use "custom-properties";
-@use "variables" as vars;
 @use "fonts";
 
 body {
-  background-color: vars.$main-menu-bg-color;
+  background-color: var(--color-blue_dark);
   color: var(--color-white);
-  font-family: vars.$default-font-family;
-  font-weight: normal;
-  font-size: 15px;
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight_normal);
+  font-size: var(--font-size_large);
   line-height: 22px;
 }
 
 h3 {
   font-weight: bold;
-  font-size: 25px;
+  font-size: 1.5rem;
   line-height: 1.2;
   margin-bottom: 20px;
   padding-top: 20px;
@@ -23,9 +22,14 @@ h3 {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 600px;
+  max-width: 50vw;
   margin-top: -50px;
-  transform: translateY(-50%) translateX(-300px);
+  transform: translateY(-50%) translateX(-50%);
+
+  img {
+    height: 75px;
+    margin-left: -0.35em;
+  }
 }
 
 ul {
@@ -45,13 +49,27 @@ ul {
   }
 }
 
+p {
+  margin: 2em 0;
+}
+
 a {
   color: var(--color-white);
-  text-decoration: underline;
-  transition: all 0.1s ease-in-out;
+  text-decoration: none;
+  transition: all var(--transition-duration) var(--transition-easing);
 
   &:hover {
     color: var(--color-white);
+    text-decoration: underline;
+  }
+
+  &.button {
+    background-color: white;
+    border-radius: var(--border-radius_medium);
+    padding: 0.5em 0.75em;
     text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--color-blue_dark);
   }
 }

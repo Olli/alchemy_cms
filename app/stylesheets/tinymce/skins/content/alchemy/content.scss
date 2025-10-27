@@ -5,7 +5,6 @@
 * For commercial licenses see https://www.tiny.cloud/
 */
 
-@use "../../../../alchemy/variables" as vars;
 @use "../../../../alchemy/custom-properties";
 
 html {
@@ -13,14 +12,14 @@ html {
 }
 
 body {
-  font-family: vars.$default-font-family;
+  font-family: var(--font-sans);
   line-height: 1.4;
   margin: 1em;
-  color: var(--color-text);
+  color: #333;
 }
 
 a {
-  color: var(--color-blue_dark);
+  color: #000;
 }
 
 table {
@@ -29,7 +28,7 @@ table {
 
 table td,
 table th {
-  border: 1px solid vars.$default-border-color;
+  border: 1px solid #666;
   padding: 0.4rem;
 }
 
@@ -39,32 +38,32 @@ figure {
 }
 
 figure figcaption {
-  color: var(--color-grey_dark);
+  color: #333;
   display: block;
   margin-top: 0.25rem;
   text-align: center;
 }
 
 hr {
-  border-color: vars.$default-border-color;
+  border-color: #666;
   border-style: solid;
   border-width: 1px 0 0 0;
 }
 
 code {
-  background-color: var(--color-grey_very_light);
-  border-radius: vars.$default-border-radius;
+  background-color: #999;
+  border-radius: var(--border-radius_medium);
   padding: 0.1rem 0.2rem;
 }
 
 .mce-content-body:not([dir="rtl"]) blockquote {
-  border-left: 2px solid vars.$default-border-color;
+  border-left: 2px solid #666;
   margin-left: 1.5rem;
   padding-left: 1rem;
 }
 
 .mce-content-body[dir="rtl"] blockquote {
-  border-right: 2px solid vars.$default-border-color;
+  border-right: 2px solid #666;
   margin-right: 1.5rem;
   padding-right: 1rem;
 }

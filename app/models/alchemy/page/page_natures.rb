@@ -13,8 +13,21 @@ module Alchemy
         language.public? && !!public_version&.public?
       end
 
+      # Cache-Control max-age duration in seconds.
+      #
+      # You can set this via the `ALCHEMY_PAGE_CACHE_MAX_AGE` environment variable,
+      # in the `Alchemy.config.page_cache_max_age` configuration option,
+      # or in the pages definition in `config/alchemy/page_layouts.yml` file.
+      #
+      # Defaults to 600 seconds.
       def expiration_time
-        public_until ? public_until - Time.current : nil
+        return 0 unless cache_page?
+
+        if definition.cache.to_s.match?(/\d+/)
+          definition.cache.to_i
+        else
+          Alchemy.config.page_cache.max_age
+        end
       end
 
       def rootpage?
@@ -38,13 +51,13 @@ module Alchemy
       # @returns Array
       #
       def has_limited_editors?
-        definition["editable_by"].present?
+        definition.editable_by.present?
       end
 
       def editor_roles
         return unless has_limited_editors?
 
-        definition["editable_by"]
+        definition.editable_by
       end
 
       # True if page locked_at timestamp and locked_by id are set
@@ -80,10 +93,10 @@ module Alchemy
 
       # Returns the self#page_layout definition from config/alchemy/page_layouts.yml file.
       def definition
-        definition = PageLayout.get(page_layout)
+        definition = PageDefinition.get(page_layout)
         if definition.nil?
           log_warning "Page definition for `#{page_layout}` not found. Please check `page_layouts.yml` file."
-          return {}
+          return PageDefinition.new
         end
         definition
       end
@@ -144,17 +157,9 @@ module Alchemy
       # @returns Boolean
       #
       def cache_page?
-        return false unless caching_enabled?
+        return false if !public? || restricted?
 
-        page_layout = PageLayout.get(self.page_layout)
-        page_layout["cache"] != false && page_layout["searchresults"] != true
-      end
-
-      private
-
-      def caching_enabled?
-        Alchemy.config.get(:cache_pages) &&
-          Rails.application.config.action_controller.perform_caching
+        definition.cache != false && definition.searchresults != true
       end
     end
   end

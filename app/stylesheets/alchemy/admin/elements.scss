@@ -3,16 +3,11 @@
 @use "../mixins";
 @use "../variables" as vars;
 
-:root {
-  --elements-window-width: 0px;
-  --elements-window-min-width: #{vars.$elements-window-min-width};
-}
-
 #alchemy_elements_window {
   --width: var(--elements-window-width, 100vw);
   position: absolute;
   right: 0;
-  top: vars.$top-menu-height;
+  top: var(--top-menu-height);
   z-index: 20;
   display: block;
   width: var(--width);
@@ -20,10 +15,13 @@
   max-width: calc(
     100vw - var(--main-menu-width) - var(--preview-window-min-width)
   );
-  height: calc(100vh - #{vars.$top-menu-height});
-  border-left: vars.$default-border;
-  background-color: var(--color-grey_very_light);
-  transition: vars.$transition-duration ease-in-out;
+  height: calc(100vh - var(--top-menu-height));
+  border-left: var(--border-default);
+  background-color: var(
+    --elements-window-background-color,
+    var(--dialog-background-color)
+  );
+  transition: var(--transition-duration) ease-in-out;
   transform: translate3d(100%, 0, 0);
 
   .elements-window-visible & {
@@ -44,7 +42,7 @@
 
   // 1778px * 0.225 = 400px (the min width of the elements window)
   @media screen and (min-width: 1778px) {
-    --elements-window-width: #{vars.$elements-window-width};
+    --elements-window-width: 22.5vw;
   }
 }
 
@@ -56,22 +54,23 @@ alchemy-elements-window-handle {
   z-index: 1500; // tinymce .tox-fullscreen has 1200
   height: inherit;
   width: var(--width);
-  transition-duration: vars.$transition-duration;
-  transition-property: background-color width left;
+  transition-duration: var(--transition-duration);
+  transition-property: background-color, width, left;
   transition-timing-function: ease-in-out;
 
   &:hover,
   &.is-dragged {
-    background: var(--color-blue_dark);
+    background: var(
+      --elements-window-handle-dragged-background-color,
+      var(--color-blue_dark)
+    );
     cursor: ew-resize;
   }
 }
 
 .elements-window-toolbar {
   @extend %gradiated-toolbar;
-  display: flex;
   padding: var(--spacing-2);
-  border-bottom: vars.$default-border;
 
   .right {
     display: inline-block;
@@ -91,16 +90,20 @@ alchemy-elements-window-handle {
 
 alchemy-tinymce {
   display: block;
+  border-radius: var(--border-radius_medium);
 }
 
 #main-content-elements {
-  --scrollable-elements-offset: #{vars.$top-menu-height + vars.$toolbar-height};
+  --scrollable-elements-offset: calc(
+    var(--top-menu-height) + var(--toolbar-height)
+  );
   padding: var(--spacing-2) var(--spacing-1) 2px;
 }
 
 #fixed-elements sl-tab-panel {
-  --scrollable-elements-offset: #{vars.$top-menu-height + vars.$toolbar-height +
-    vars.$tab-bar-height};
+  --scrollable-elements-offset: calc(
+    var(--top-menu-height) + var(--toolbar-height) + 51px
+  );
 }
 
 .scrollable-elements {
@@ -115,8 +118,8 @@ alchemy-tinymce {
   align-items: center;
   flex-grow: 1;
   white-space: nowrap;
-  transition: color vars.$transition-duration;
-  line-height: 1;
+  transition: color var(--transition-duration);
+  line-height: 1.5;
   max-width: 85%;
 
   .preview_text_quote {
@@ -135,12 +138,15 @@ alchemy-tinymce {
 }
 
 .element-handle {
+  position: relative;
   display: inline-flex;
+  width: var(--spacing-4);
+  height: var(--spacing-4);
   cursor: move;
   padding-right: var(--spacing-1);
 }
 
-.element-toggle {
+button.element-toggle {
   width: 20px;
   height: 20px;
   display: flex;
@@ -155,9 +161,8 @@ alchemy-tinymce {
   margin: 0 0 0 auto;
 
   &:hover {
-    &:not(:focus):not(:active) {
-      background-color: vars.$default-border-color;
-      border-color: transparent;
+    &:not(:focus) {
+      background-color: var(--border-color);
       cursor: pointer;
     }
   }
@@ -169,11 +174,14 @@ alchemy-tinymce {
 
 .element-editor {
   position: relative;
-  border: 1px solid vars.$default-border-color;
-  border-radius: vars.$default-border-radius;
-  background-color: var(--color-grey_very_light);
+  border: 1px solid var(--element-editor-border-color, var(--border-color));
+  border-radius: var(--border-radius_medium);
+  background-color: var(
+    --element-editor-background-color,
+    --dialog-background-color
+  );
   margin: var(--spacing-2) 0;
-  transition: box-shadow vars.$transition-duration;
+  transition: box-shadow var(--transition-duration);
   scroll-margin: var(--spacing-2);
 
   &:first-child {
@@ -185,7 +193,7 @@ alchemy-tinymce {
 
     &.folded {
       opacity: 0.7;
-      transition: opacity vars.$transition-duration;
+      transition: opacity var(--transition-duration);
 
       &:hover {
         opacity: 1;
@@ -231,27 +239,27 @@ alchemy-tinymce {
   }
 
   &.dirty {
-    border-color: #d0c83d;
+    border-color: var(--element-dirty-border-color);
 
     > .element-header {
-      background-color: #fff8df;
+      background-color: var(--element-dirty-header-color);
     }
   }
 
   &.deprecated {
-    border-color: vars.$element-deprecated-border-color;
+    border-color: var(--element-deprecated-border-color);
 
     > .element-header {
-      background-color: vars.$element-header-deprecated-bg-color;
+      background-color: var(--element-header-deprecated-bg-color);
       background-image: linear-gradient(
         45deg,
-        vars.$element-header-deprecated-bg-color 25%,
-        vars.$element-header-bg-color 25%,
-        vars.$element-header-bg-color 50%,
-        vars.$element-header-deprecated-bg-color 50%,
-        vars.$element-header-deprecated-bg-color 75%,
-        vars.$element-header-bg-color 75%,
-        vars.$element-header-bg-color 100%
+        var(--element-header-deprecated-bg-color) 25%,
+        var(--element-header-bg-color) 25%,
+        var(--element-header-bg-color) 50%,
+        var(--element-header-deprecated-bg-color) 50%,
+        var(--element-header-deprecated-bg-color) 75%,
+        var(--element-header-bg-color) 75%,
+        var(--element-header-bg-color) 100%
       );
       background-size: 28.28px 28.28px;
     }
@@ -260,7 +268,8 @@ alchemy-tinymce {
   &.selected:not(.is-fixed),
   &:hover:not(.is-fixed) {
     &:not(.element-hidden) {
-      box-shadow: 0 2px 8px rgba(#9b9b9b, 0.75);
+      box-shadow: 0 2px 8px
+        var(--element-editor-hover-box-shadow-color, hsla(0, 0%, 60%, 0.75));
     }
   }
 
@@ -268,8 +277,8 @@ alchemy-tinymce {
       .deprecated
     ) {
     > .element-header {
-      background-color: vars.$element-header-active-bg-color;
-      color: vars.$element-header-active-color;
+      background-color: var(--element-header-active-bg-color);
+      color: var(--element-header-active-color);
     }
   }
 
@@ -287,16 +296,24 @@ alchemy-tinymce {
   &.expanded {
     &.not-fixed {
       .nestable-elements {
-        box-shadow: inset 0 4px 8px -2px hsl(0deg, 0%, 79%);
-        background-color: var(--color-grey_light);
+        box-shadow: inset 0 4px 8px -2px
+          var(--nestable-elements-box-shadow-color, hsl(0deg, 0%, 79%));
+        background-color: var(
+          --nestable-elements-background-color,
+          var(--color-grey_light)
+        );
         padding: var(--spacing-1);
       }
     }
   }
 
   &.dragged {
-    border: 1px solid var(--color-grey_dark);
-    background-color: var(--color-grey_light);
+    border: 1px solid
+      var(--element-editor-dragged-border-color, var(--color-grey_dark));
+    background-color: var(
+      --element-editor-dragged-background-color,
+      var(--color-grey_light)
+    );
     opacity: 0.5;
     box-shadow: none !important;
 
@@ -321,9 +338,8 @@ alchemy-tinymce {
       height: 35px;
       opacity: 0;
       z-index: 1;
-      box-shadow: 0 1px 1px vars.$default-border-color;
-      background-color: var(--color-grey_very_light);
-      transition: all vars.$transition-duration;
+      box-shadow: 0 1px 1px var(--border-color);
+      transition: all var(--transition-duration);
 
       sl-switch::part(label) {
         display: none;
@@ -341,7 +357,7 @@ alchemy-tinymce {
       border-top: 0;
 
       .button {
-        padding: vars.$small-button-padding;
+        padding: var(--button-small-padding);
       }
     }
 
@@ -390,7 +406,7 @@ alchemy-tinymce {
     transform: scale(0);
     transform-origin: top center;
     transition:
-      opacity vars.$transition-duration ease-out,
+      opacity var(--transition-duration) ease-out,
       transform 1s ease-in;
   }
 
@@ -439,7 +455,7 @@ alchemy-tinymce {
     width: 100%;
     margin: 0 0 var(--spacing-4) 0;
     border: 0 none;
-    border-top: 1px solid var(--color-grey_light);
+    border-top: 1px solid var(--border-color);
     opacity: 1;
   }
 }
@@ -449,20 +465,49 @@ alchemy-tinymce {
   gap: var(--spacing-1);
   align-items: center;
   padding: var(--spacing-2);
-  background-color: vars.$element-header-bg-color;
+  background-color: var(--element-header-bg-color);
   @extend .disable-user-select;
   cursor: pointer;
-  border-radius: vars.$default-border-radius;
-  transition: background-color vars.$transition-duration;
+  border-radius: var(--border-radius_medium);
+  transition-duration: var(--transition-duration);
+  transition-property: background-color, color;
 
   .expanded & {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
 
-  .icon {
+  .element-icon {
     fill: currentColor;
-    transition: fill vars.$transition-duration;
+    transition: fill var(--transition-duration);
+  }
+
+  > .element-handle {
+    .handle-icon,
+    .element-icon {
+      position: absolute;
+      width: var(--spacing-4);
+      height: var(--spacing-4);
+      transition: opacity var(--transition-duration);
+    }
+
+    .handle-icon {
+      opacity: 0;
+    }
+
+    .element-icon {
+      opacity: 1;
+    }
+  }
+
+  &:hover {
+    > .element-handle .handle-icon {
+      opacity: 1;
+    }
+
+    > .element-handle .element-icon {
+      opacity: 0;
+    }
   }
 }
 
@@ -476,17 +521,18 @@ alchemy-tinymce {
   width: 100%;
   padding: var(--spacing-1);
   gap: var(--spacing-1);
-  height: vars.$element-toolbar-height;
-  border-top: 1px solid var(--color-grey_light);
-  border-bottom: 1px solid var(--color-grey_light);
+  height: 37px;
+  border-top: 1px solid var(--element-toolbar-border-color);
+  border-bottom: 1px solid var(--element-toolbar-border-color);
+  background-color: var(--element-toolbar-background-color);
 
   .is-fixed & {
     border-top-width: 0;
   }
 
   .icon_button {
-    width: vars.$icon-button-medium-width;
-    height: vars.$icon-button-medium-height;
+    width: var(--icon-button-medium-width);
+    height: var(--icon-button-medium-height);
   }
 }
 
@@ -504,7 +550,7 @@ alchemy-publish-element-button {
 }
 
 .element-footer {
-  border-top: 1px solid var(--color-grey_light);
+  border-top: 1px solid var(--element-toolbar-border-color);
   padding: var(--spacing-2);
   text-align: right;
 
@@ -517,7 +563,7 @@ alchemy-publish-element-button {
   width: 100%;
   padding: var(--spacing-1) 0;
   position: relative;
-  border-bottom: 1px solid var(--color-grey_light);
+  border-bottom: 1px solid var(--element-toolbar-border-color);
 
   &:last-child {
     border-bottom: none;
@@ -557,24 +603,24 @@ alchemy-publish-element-button {
 
   .icon_button {
     &:not(.linked) {
-      background-color: var(--color-grey_light);
-      border-color: vars.$default-border-color;
-      border-width: vars.$form-field-border-width;
-      border-style: vars.$form-field-border-style;
+      background-color: var(--form-field-addon-background-color);
+      border-color: var(--form-field-border-color);
+      border-width: var(--form-field-border-width);
+      border-style: var(--form-field-border-style);
       box-shadow: none;
       padding: 0;
       margin: 0;
       border-radius: 0;
-      width: vars.$form-field-addon-width;
-      height: vars.$form-field-height;
+      width: var(--form-field-addon-width);
+      height: var(--form-field-height);
 
       &:hover {
         border-color: #c0c0c0;
       }
 
       &:focus {
-        box-shadow: 0 0 0 2px vars.$focus-color;
-        border-color: vars.$focus-color;
+        box-shadow: 0 0 0 2px var(--focus-color);
+        border-color: var(--focus-color);
       }
 
       &[is="alchemy-unlink-button"] {
@@ -584,7 +630,7 @@ alchemy-publish-element-button {
 
       &.disabled,
       &.disabled:hover {
-        background-color: vars.$form-field-disabled-bg-color;
+        background-color: var(--form-field-disabled-bg-color);
       }
     }
 
@@ -595,13 +641,13 @@ alchemy-publish-element-button {
       border-color: rgba(187, 162, 102, 0.5);
 
       &[is="alchemy-unlink-button"] {
-        border-radius: 0 vars.$default-border-radius vars.$default-border-radius
+        border-radius: 0 var(--border-radius_medium) var(--border-radius_medium)
           0;
         border-left-width: 0;
 
         &:focus {
-          border-radius: 0 vars.$default-border-radius
-            vars.$default-border-radius 0;
+          border-radius: 0 var(--border-radius_medium)
+            var(--border-radius_medium) 0;
         }
       }
     }
@@ -617,13 +663,13 @@ alchemy-publish-element-button {
   z-index: 0;
   width: 100%;
   padding: var(--spacing-1);
-  background-color: #fff;
-  border-bottom-left-radius: vars.$default-border-radius;
-  border-bottom-right-radius: vars.$default-border-radius;
+  background-color: var(--picture-thumbnail-toolbar-bg-color, #fff);
+  border-bottom-left-radius: var(--border-radius_medium);
+  border-bottom-right-radius: var(--border-radius_medium);
 
   .icon_button {
-    width: vars.$icon-button-medium-width;
-    height: vars.$icon-button-medium-height;
+    width: var(--icon-button-medium-width);
+    height: var(--icon-button-medium-height);
   }
 
   alchemy-link-buttons {
@@ -651,7 +697,7 @@ alchemy-publish-element-button {
     margin: var(--spacing-1) 0;
     padding: 0;
     padding-bottom: 34px;
-    box-shadow: 0 0 1px 1px vars.$default-border-color;
+    box-shadow: 0 0 1px 1px var(--border-color);
 
     .picture_image {
       overflow: hidden;
@@ -669,7 +715,7 @@ alchemy-publish-element-button {
   }
 
   &.validation_failed .picture_thumbnail {
-    border-color: vars.$error_border_color;
+    border-color: var(--notice-error-border-color);
   }
 
   .thumbnail_background {
@@ -678,7 +724,7 @@ alchemy-publish-element-button {
 
     alchemy-icon {
       --icon-size: 3em;
-      color: var(--color-grey_dark);
+      color: var(--icon-color);
 
       &.error {
         --icon-size: var(--icon-size-md);
@@ -713,13 +759,13 @@ alchemy-publish-element-button {
 .ingredient-editor.headline {
   &.with-level-select {
     input[type="text"] {
-      padding-right: calc(#{vars.$form-field-addon-width} + var(--spacing-2));
+      padding-right: calc(var(--form-field-addon-width) + var(--spacing-2));
     }
 
     &.with-anchor {
       input[type="text"] {
         padding-right: calc(
-          22px + #{vars.$form-field-addon-width} + var(--spacing-1)
+          22px + var(--form-field-addon-width) + var(--spacing-1)
         );
       }
     }
@@ -727,13 +773,13 @@ alchemy-publish-element-button {
 
   &.with-size-select {
     input[type="text"] {
-      padding-right: calc(#{vars.$form-field-addon-width} + var(--spacing-2));
+      padding-right: calc(var(--form-field-addon-width) + var(--spacing-2));
     }
 
     &.with-anchor {
       input[type="text"] {
         padding-right: calc(
-          22px + #{vars.$form-field-addon-width} + var(--spacing-1)
+          22px + var(--form-field-addon-width) + var(--spacing-1)
         );
       }
     }
@@ -741,7 +787,7 @@ alchemy-publish-element-button {
     &.with-level-select {
       input[type="text"] {
         padding-right: calc(
-          2 * (#{vars.$form-field-addon-width} + var(--spacing-1))
+          2 * (var(--form-field-addon-width) + var(--spacing-1))
         );
       }
 
@@ -749,7 +795,7 @@ alchemy-publish-element-button {
         input[type="text"] {
           padding-right: calc(
             var(--spacing-4) + 2 *
-              (#{vars.$form-field-addon-width} + var(--spacing-1))
+              (var(--form-field-addon-width) + var(--spacing-1))
           );
         }
       }
@@ -759,7 +805,7 @@ alchemy-publish-element-button {
 
 .ingredient-editor.number {
   input[type="number"] {
-    padding-right: vars.$form-field-addon-width;
+    padding-right: var(--form-field-addon-width);
   }
 
   .input-field:has(input[type="range"]) {
@@ -770,7 +816,7 @@ alchemy-publish-element-button {
   }
 
   input[type="range"] {
-    height: vars.$form-field-height;
+    height: var(--form-field-height);
     flex-grow: 1;
     margin: 0;
     margin-right: var(--spacing-2);
@@ -791,14 +837,16 @@ alchemy-publish-element-button {
     gap: var(--spacing-1);
     margin: 6px 0 var(--spacing-1);
     padding: 0 var(--spacing-1) 0 var(--spacing-2);
-    border: vars.$default-border;
-    background-color: var(--color-white);
-    border-radius: vars.$default-border-radius;
-    height: vars.$form-field-height;
+    border-style: var(--border-style);
+    border-width: var(--border-width_small);
+    border-color: var(--form-field-border-color);
+    background-color: var(--form-field-background-color);
+    border-radius: var(--border-radius_medium);
+    height: var(--form-field-height);
 
     .validation_failed & {
-      color: vars.$error_text_color;
-      border-color: vars.$error_border_color;
+      color: var(--notice-error-text-color);
+      border-color: var(--notice-error-border-color);
     }
   }
 
@@ -824,8 +872,7 @@ alchemy-publish-element-button {
   display: flex;
   gap: var(--spacing-1);
   align-items: center;
-  background-color: white;
-  border-radius: 0 vars.$default-border-radius vars.$default-border-radius 0;
+  border-radius: 0 var(--border-radius_medium) var(--border-radius_medium) 0;
 
   a {
     display: inline-flex;
@@ -870,14 +917,14 @@ select.long {
   &.linkable {
     input[type="text"] {
       padding-right: calc(
-        2 * (#{vars.$form-field-addon-width} + var(--spacing-1))
+        2 * (var(--form-field-addon-width) + var(--spacing-1))
       );
     }
 
     &.with-anchor {
       input[type="text"] {
         padding-right: calc(
-          26px + 2 * (#{vars.$form-field-addon-width} + var(--spacing-1))
+          26px + 2 * (var(--form-field-addon-width) + var(--spacing-1))
         );
       }
     }
@@ -907,6 +954,18 @@ select.long {
     }
   }
 
+  &.dirty {
+    input,
+    select,
+    textarea,
+    .file,
+    .picture_thumbnail,
+    .select2-container,
+    .tinymce_container {
+      outline: 1px solid var(--element-dirty-border-color);
+    }
+  }
+
   &.display_inline {
     display: inline-block;
     vertical-align: middle;
@@ -921,7 +980,7 @@ select.long {
 
   &.validation_failed {
     > label {
-      color: vars.$error_text_color;
+      color: var(--notice-error-text-color);
     }
 
     input {
@@ -929,22 +988,22 @@ select.long {
     }
 
     .tinymce_container {
-      outline: 1px solid vars.$error_border_color;
+      outline: 1px solid var(--notice-error-border-color);
     }
   }
 
   &.deprecated {
-    border-radius: vars.$default-border-radius;
-    background-color: vars.$element-header-deprecated-bg-color;
+    border-radius: var(--border-radius_medium);
+    background-color: var(--element-header-deprecated-bg-color);
     background-image: linear-gradient(
       45deg,
-      vars.$element-header-deprecated-bg-color 25%,
-      vars.$element-header-bg-color 25%,
-      vars.$element-header-bg-color 50%,
-      vars.$element-header-deprecated-bg-color 50%,
-      vars.$element-header-deprecated-bg-color 75%,
-      vars.$element-header-bg-color 75%,
-      vars.$element-header-bg-color 100%
+      var(--element-header-deprecated-bg-color) 25%,
+      var(--element-header-bg-color) 25%,
+      var(--element-header-bg-color) 50%,
+      var(--element-header-deprecated-bg-color) 50%,
+      var(--element-header-deprecated-bg-color) 75%,
+      var(--element-header-bg-color) 75%,
+      var(--element-header-bg-color) 100%
     );
     background-size: 28.28px 28.28px;
     padding-left: 2px;
@@ -957,6 +1016,7 @@ select.long {
     font-size: var(--font-size_small);
     line-height: 15px;
     text-indent: 1px;
+    color: var(--form-field-label-color);
 
     span.warning.icon {
       position: relative;
@@ -1013,9 +1073,9 @@ textarea.has_tinymce {
 }
 
 .ingredient-editor.html textarea {
-  font-family: vars.$mono-font-family;
+  font-family: var(--font-mono);
   resize: vertical;
-  font-size: vars.$form-field-font-size;
+  font-size: var(--form-field-font-size);
 }
 
 .text_short_float_left {
@@ -1030,11 +1090,11 @@ textarea.has_tinymce {
   gap: var(--spacing-1);
   margin-top: var(--spacing-2);
   margin-bottom: var(--spacing-2);
-  background-color: vars.$error_background_color;
+  background-color: var(--notice-error-background-color);
   padding: var(--spacing-2);
-  border-radius: vars.$default-border-radius;
-  color: vars.$error_text_color;
-  border: 1px solid vars.$error_border_color;
+  border-radius: var(--border-radius_medium);
+  color: var(--notice-error-text-color);
+  border: 1px solid var(--notice-error-border-color);
 
   p {
     margin: 0;
@@ -1097,7 +1157,10 @@ textarea.has_tinymce {
 
 .droppable-elements {
   min-height: 36px;
-  background-color: var(--color-yellow_light);
+  background-color: var(
+    --droppable-elements-background-color,
+    var(--color-yellow_light)
+  );
 }
 
 label.ingredient-date--label,
@@ -1124,19 +1187,19 @@ label.ingredient-date--label {
   }
 
   .linkable & {
-    right: calc(2 * #{vars.$form-field-addon-width} + var(--spacing-1));
+    right: calc(2 * var(--form-field-addon-width) + var(--spacing-1));
   }
 
   .with-size-select & {
-    right: calc(#{vars.$form-field-addon-width} + var(--spacing-1));
+    right: calc(var(--form-field-addon-width) + var(--spacing-1));
   }
 
   .with-level-select & {
-    right: calc(#{vars.$form-field-addon-width} + var(--spacing-1));
+    right: calc(var(--form-field-addon-width) + var(--spacing-1));
   }
 
   .with-level-select.with-size-select & {
-    right: calc(2 * #{vars.$form-field-addon-width} + var(--spacing-1));
+    right: calc(2 * var(--form-field-addon-width) + var(--spacing-1));
   }
 }
 

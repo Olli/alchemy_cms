@@ -4,16 +4,28 @@ require "active_support"
 require "active_support/core_ext/string"
 
 require "alchemy/configuration/boolean_option"
+require "alchemy/configuration/collection_option"
+require "alchemy/configuration/configuration_option"
 require "alchemy/configuration/class_option"
-require "alchemy/configuration/class_set_option"
 require "alchemy/configuration/integer_option"
-require "alchemy/configuration/integer_list_option"
+require "alchemy/configuration/pathname_option"
 require "alchemy/configuration/regexp_option"
-require "alchemy/configuration/string_list_option"
 require "alchemy/configuration/string_option"
 
 module Alchemy
   class Configuration
+    class ConfigurationError < StandardError
+      attr_reader :name, :value, :allowed_classes
+
+      def initialize(name, value, allowed_classes)
+        @name = name
+        @value = value
+        @allowed_classes = allowed_classes
+        expected_classes_message = allowed_classes.map(&:name).to_sentence(two_words_connector: " or ", last_word_connector: ", or ")
+        super("Invalid configuration value for #{name}: #{value.inspect} (expected #{expected_classes_message})")
+      end
+    end
+
     def initialize(configuration_hash = {})
       set(configuration_hash)
     end
@@ -45,7 +57,8 @@ module Alchemy
 
     def to_h
       self.class.defined_options.map do |option|
-        [option, send(option)]
+        value = send(option)
+        [option, value.respond_to?(:to_serializable_array) ? value.to_serializable_array : value]
       end.concat(
         self.class.defined_configurations.map do |configuration|
           [configuration, send(configuration).to_h]
@@ -57,6 +70,10 @@ module Alchemy
       def defined_configurations = []
 
       def defined_options = []
+
+      def defined_values
+        defined_options + defined_configurations
+      end
 
       def configuration(name, configuration_class)
         # The defined configurations on a class are all those defined directly on
@@ -99,11 +116,19 @@ module Alchemy
           super() + singleton_options
         end
 
-        define_method(name) do
+        define_method("#{name}_option") do
           unless instance_variable_defined?(:"@#{name}")
             send(:"#{name}=", default)
           end
-          instance_variable_get(:"@#{name}").value
+          instance_variable_get(:"@#{name}")
+        end
+
+        define_method(name) do
+          send("#{name}_option").value
+        end
+
+        define_method("raw_#{name}") do
+          send("#{name}_option").raw_value
         end
 
         define_method(:"#{name}=") do |value|
@@ -111,5 +136,18 @@ module Alchemy
         end
       end
     end
+
+    def hash
+      self.class.defined_values.map do |ivar|
+        [ivar, send(ivar).hash]
+      end.hash
+    end
+
+    def ==(other)
+      equal?(other) || self.class == other.class && self.class.defined_values.all? do |var|
+        send(var) == other.send(var)
+      end
+    end
+    alias_method :eql?, :==
   end
 end

@@ -5,6 +5,9 @@ require "rails_helper"
 RSpec.describe Alchemy::Ingredients::Picture do
   it_behaves_like "an alchemy ingredient"
 
+  it { is_expected.to delegate_method(:description_for).to(:picture).allow_nil }
+  it { is_expected.to delegate_method(:name).to(:picture).allow_nil }
+
   let(:element) { build_stubbed(:alchemy_element, name: "all_you_can_eat") }
   let(:picture) { build_stubbed(:alchemy_picture) }
 
@@ -126,12 +129,20 @@ RSpec.describe Alchemy::Ingredients::Picture do
   end
 
   describe "#picture_id=" do
-    let(:picture) { Alchemy::Picture.new(id: 111) }
+    let(:picture_id) { 111 }
 
-    subject { picture_ingredient.picture_id = picture.id }
+    subject! { picture_ingredient.picture_id = picture_id }
 
-    it { is_expected.to be(111) }
+    it { expect(picture_ingredient.related_object_id).to eq(111) }
     it { expect(picture_ingredient.related_object_type).to eq("Alchemy::Picture") }
+
+    context "with nil passed as id" do
+      let(:picture_id) { nil }
+
+      it "nullifies related_object_type" do
+        expect(picture_ingredient.related_object_type).to be_nil
+      end
+    end
   end
 
   describe "preview_text" do
@@ -172,7 +183,7 @@ RSpec.describe Alchemy::Ingredients::Picture do
 
   it_behaves_like "having picture thumbnails" do
     let(:element) { build(:alchemy_element, name: "all_you_can_eat") }
-    let(:picture) { build(:alchemy_picture) }
+    let(:picture) { create(:alchemy_picture) }
 
     let(:record) do
       described_class.new(

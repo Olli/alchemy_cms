@@ -456,9 +456,9 @@ module Alchemy
           end
         end
 
-        it "should generate a three letter urlname from two letter name" do
+        it "should generate a two letter urlname from two letter name" do
           page = create(:alchemy_page, name: "Au", language: language, parent: language_root)
-          expect(page.urlname).to eq("-au")
+          expect(page.urlname).to eq("au")
         end
 
         it "should generate a three letter urlname from two letter name with umlaut" do
@@ -466,9 +466,9 @@ module Alchemy
           expect(page.urlname).to eq("aue")
         end
 
-        it "should generate a three letter urlname from one letter name" do
+        it "should generate a one letter urlname from one letter name" do
           page = create(:alchemy_page, name: "A", language: language, parent: language_root)
-          expect(page.urlname).to eq("--a")
+          expect(page.urlname).to eq("a")
         end
 
         it "should add a user stamper" do
@@ -594,21 +594,21 @@ module Alchemy
 
       it "returns all element definitions of available elements" do
         expect(subject).to be_an(Array)
-        expect(subject.collect { |e| e["name"] }).to include("header")
+        expect(subject.map(&:name)).to include("header")
       end
 
       context "with unique elements already on page" do
         let!(:element) { create(:alchemy_element, :unique, page: page, page_version: page.draft_version) }
 
         it "does not return unique element definitions" do
-          expect(subject.collect { |e| e["name"] }).to include("article")
-          expect(subject.collect { |e| e["name"] }).not_to include("header")
+          expect(subject.map(&:name)).to include("article")
+          expect(subject.map(&:name)).not_to include("header")
         end
 
         it "does not mutate the element_definitions collection" do
-          expect(page.element_definitions.collect { |e| e["name"] }).to include("header")
+          expect(page.element_definitions.map(&:name)).to include("header")
           subject
-          expect(page.element_definitions.collect { |e| e["name"] }).to include("header")
+          expect(page.element_definitions.map(&:name)).to include("header")
         end
       end
 
@@ -626,55 +626,55 @@ module Alchemy
         before do
           allow(Element).to receive(:definitions) do
             [
-              {
-                "name" => "column_headline",
-                "amount" => 3,
-                "ingredients" => [
+              ElementDefinition.new(
+                name: "column_headline",
+                amount: 3,
+                ingredients: [
                   {
-                    "role" => "headline",
-                    "type" => "Text"
+                    role: "headline",
+                    type: "Text"
                   }
                 ]
-              },
-              {
-                "name" => "unique_headline",
-                "unique" => true,
-                "amount" => 3,
-                "ingredients" => [
+              ),
+              ElementDefinition.new(
+                name: "unique_headline",
+                unique: true,
+                amount: 3,
+                ingredients: [
                   {
-                    "role" => "headline",
-                    "type" => "Text"
+                    role: "headline",
+                    type: "Text"
                   }
                 ]
-              }
+              )
             ]
           end
-          allow(PageLayout).to receive(:get) do
-            {
+          allow(PageDefinition).to receive(:get) do
+            Alchemy::PageDefinition.new(
               "name" => "columns",
               "elements" => ["column_headline", "unique_headline"],
               "autogenerate" => ["unique_headline", "column_headline", "column_headline", "column_headline"]
-            }
+            )
           end
         end
 
         it "should be readable" do
           element = page.element_definitions_by_name("column_headline").first
-          expect(element["amount"]).to be 3
+          expect(element.amount).to be 3
         end
 
         it "should limit elements" do
-          expect(subject.collect { |e| e["name"] }).not_to include("column_headline")
+          expect(subject.map(&:name)).not_to include("column_headline")
         end
 
         it "should be ignored if unique" do
-          expect(subject.collect { |e| e["name"] }).not_to include("unique_headline")
+          expect(subject.map(&:name)).not_to include("unique_headline")
         end
 
         it "does not mutate the element_definitions collection" do
-          expect(page.element_definitions.collect { |e| e["name"] }).to include("column_headline")
+          expect(page.element_definitions.map(&:name)).to include("column_headline")
           subject
-          expect(page.element_definitions.collect { |e| e["name"] }).to include("column_headline")
+          expect(page.element_definitions.map(&:name)).to include("column_headline")
         end
       end
 
@@ -715,7 +715,7 @@ module Alchemy
 
       context "When unique element has not be nested" do
         it "returns available elements" do
-          expect(currently_available_elements.collect { |e| e["name"] }).to include("slide")
+          expect(currently_available_elements.map(&:name)).to include("slide")
         end
       end
     end
@@ -971,12 +971,20 @@ module Alchemy
 
     describe "#element_definitions" do
       let(:page) { build_stubbed(:alchemy_page) }
-      subject { page.element_definitions }
-      before { expect(Element).to receive(:definitions).and_return([{"name" => "article"}, {"name" => "header"}]) }
+
+      subject { page.element_definitions.map(&:name) }
+
+      before do
+        expect(Element).to receive(:definitions) do
+          [
+            ElementDefinition.new(name: "article"),
+            ElementDefinition.new(name: "header")
+          ]
+        end
+      end
 
       it "returns all element definitions that could be placed on current page" do
-        is_expected.to include({"name" => "article"})
-        is_expected.to include({"name" => "header"})
+        is_expected.to match_array(["article", "header"])
       end
     end
 
@@ -985,9 +993,9 @@ module Alchemy
 
       subject(:descendent_element_definitions) { page.descendent_element_definitions }
 
-      it "returns all element definitions including the nestable element definitions" do
-        is_expected.to include(Alchemy::Element.definition_by_name("slider"))
-        is_expected.to include(Alchemy::Element.definition_by_name("slide"))
+      it "returns all element definitions from nestable element definitions" do
+        definitions = descendent_element_definitions.map(&:name)
+        expect(definitions).to eq(["slide"])
       end
 
       context "with nestable element being defined on multiple elements" do
@@ -997,16 +1005,16 @@ module Alchemy
           end
           expect(Element).to receive(:definitions).at_least(:once) do
             [
-              {"name" => "slider", "nestable_elements" => %w[slide]},
-              {"name" => "gallery", "nestable_elements" => %w[slide]},
-              {"name" => "slide"}
+              ElementDefinition.new(name: "slider", nestable_elements: %w[slide]),
+              ElementDefinition.new(name: "gallery", nestable_elements: %w[slide]),
+              ElementDefinition.new(name: "slide")
             ]
           end
         end
 
         it "only includes the definition once" do
-          slide_definitions = descendent_element_definitions.select { |d| d["name"] == "slide" }
-          expect(slide_definitions.length).to eq(1)
+          definitions = descendent_element_definitions.map(&:name)
+          expect(definitions).to eq(["slide"])
         end
       end
     end
@@ -1046,7 +1054,7 @@ module Alchemy
 
       context "with elements assigned in page definition" do
         let(:page_definition) do
-          {"elements" => %w[article]}
+          Alchemy::PageDefinition.new(name: "foo", elements: %w[article])
         end
 
         it "returns an array of the page's element names" do
@@ -1055,7 +1063,7 @@ module Alchemy
       end
 
       context "without elements assigned in page definition" do
-        let(:page_definition) { {} }
+        let(:page_definition) { Alchemy::PageDefinition.new }
 
         it { is_expected.to eq([]) }
       end
@@ -1214,19 +1222,22 @@ module Alchemy
       context "if the page layout could not be found in the definition file" do
         let(:page) { build_stubbed(:alchemy_page, page_layout: "notexisting") }
 
-        it "it loggs a warning." do
+        it "it logs a warning." do
           expect(Alchemy::Logger).to receive(:warn)
           page.definition
         end
 
-        it "it returns empty hash." do
-          expect(page.definition).to eq({})
+        it "it returns empty definition." do
+          expect(page.definition).to be_an(Alchemy::PageDefinition)
+          expect(page.definition.name).to be_nil
         end
       end
 
-      context "for a language root page" do
-        it "it returns the page layout definition as hash." do
-          expect(language_root.definition["name"]).to eq("index")
+      context "for a page with existing definition" do
+        let(:page) { build_stubbed(:alchemy_page) }
+
+        it "it returns the page layout definition." do
+          expect(page.definition.name).to eq("standard")
         end
       end
     end
@@ -1363,7 +1374,9 @@ module Alchemy
 
       context "template defines one alchemy role" do
         before do
-          allow(page).to receive(:definition).and_return({"editable_by" => ["freelancer"]})
+          allow(page).to receive(:definition) do
+            PageDefinition.new(name: "limited", editable_by: ["freelancer"])
+          end
         end
 
         context "user has matching alchemy role" do
@@ -1384,7 +1397,9 @@ module Alchemy
 
       context "template defines multiple alchemy roles" do
         before do
-          allow(page).to receive(:definition).and_return({"editable_by" => ["freelancer", "admin"]})
+          allow(page).to receive(:definition) do
+            PageDefinition.new(name: "limited", editable_by: ["freelancer", "admin"])
+          end
         end
 
         context "user has matching alchemy role" do
@@ -1405,7 +1420,7 @@ module Alchemy
 
       context "template has no alchemy role defined" do
         before do
-          allow(page).to receive(:definition).and_return({})
+          allow(page).to receive(:definition).and_return(PageDefinition.new)
         end
 
         context "user has matching alchemy role" do
@@ -1693,38 +1708,62 @@ module Alchemy
     end
 
     describe "#cache_page?" do
-      let(:page) { Page.new(page_layout: "news") }
+      let(:page) { build(:alchemy_page, :public, page_layout: "news") }
+
       subject { page.cache_page? }
 
-      before { Rails.application.config.action_controller.perform_caching = true }
-      after { Rails.application.config.action_controller.perform_caching = false }
-
-      it "returns true when everthing is alright" do
-        expect(subject).to be true
+      it "returns true when page is public" do
+        expect(subject).to be(true)
       end
 
-      it "returns false when the Rails app does not perform caching" do
-        Rails.application.config.action_controller.perform_caching = false
-        expect(subject).to be false
+      context "when the page layout is set to cache = false" do
+        let(:page) { build(:alchemy_page, :public, page_layout: "contact") }
+
+        it "returns false" do
+          expect(subject).to be(false)
+        end
       end
 
-      it "returns false when caching is deactivated in the Alchemy config" do
-        stub_alchemy_config(:cache_pages, false)
-        expect(subject).to be false
+      context "when the page layout is set to searchresults = true" do
+        let(:page) { build(:alchemy_page, :public, page_layout: "contact") }
+
+        it "returns false" do
+          expect(subject).to be(false)
+        end
+      end
+    end
+
+    describe "#expiration_time" do
+      subject { page.expiration_time }
+
+      let(:page) { build(:alchemy_page, :public, page_layout: "standard") }
+
+      context "if cache is disabled" do
+        before do
+          allow(page).to receive(:cache_page?).and_return(false)
+        end
+
+        it "sets it to zero" do
+          is_expected.to eq(0)
+        end
       end
 
-      it "returns false when the page layout is set to cache = false" do
-        page_layout = PageLayout.get("news")
-        page_layout["cache"] = false
-        allow(PageLayout).to receive(:get).with("news").and_return(page_layout)
-        expect(subject).to be false
+      context "if cache is set to a number on page layout" do
+        it "uses this value" do
+          is_expected.to eq(60)
+        end
       end
 
-      it "returns false when the page layout is set to searchresults = true" do
-        page_layout = PageLayout.get("news")
-        page_layout["searchresults"] = true
-        allow(PageLayout).to receive(:get).with("news").and_return(page_layout)
-        expect(subject).to be false
+      context "if cache is left blank" do
+        let(:page) { build(:alchemy_page, :public, page_layout: "everything") }
+
+        before do
+          allow(Alchemy.config.page_cache).to receive(:max_age).and_return(3600)
+        end
+
+        it "uses configured value" do
+          is_expected.to eq(3600)
+        end
       end
     end
 
@@ -1926,16 +1965,6 @@ module Alchemy
           end
         end
       end
-    end
-
-    it_behaves_like "having a hint" do
-      let(:subject) { Page.new }
-    end
-
-    it "keys hint translation by page_layout" do
-      page = Page.new(page_layout: :everything)
-      expect(page).to have_hint
-      expect(page.hint).to eq Alchemy.t("page_hints.everything")
     end
 
     describe "#layout_partial_name" do

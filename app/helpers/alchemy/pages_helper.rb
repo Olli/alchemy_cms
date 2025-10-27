@@ -46,7 +46,7 @@ module Alchemy
     def render_page_layout
       render @page, page: @page
     rescue ActionView::MissingTemplate
-      warning("PageLayout: '#{@page.page_layout}' not found. Rendering standard page_layout.")
+      warning("[alchemy]: '#{@page.page_layout}' page layout not found. Rendering 'standard' page layout.")
       render "alchemy/page_layouts/standard", page: @page
     end
 
@@ -163,7 +163,7 @@ module Alchemy
     end
 
     def meta_robots
-      "#{@page.robot_index? ? "" : "no"}index, #{@page.robot_follow? ? "" : "no"}follow"
+      "#{"no" unless @page.robot_index?}index, #{"no" unless @page.robot_follow?}follow"
     end
 
     private

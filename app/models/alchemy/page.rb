@@ -36,7 +36,7 @@
 #
 
 require_dependency "alchemy/page/fixed_attributes"
-require_dependency "alchemy/page/page_layouts"
+require_dependency "alchemy/page/definitions"
 require_dependency "alchemy/page/page_scopes"
 require_dependency "alchemy/page/page_natures"
 require_dependency "alchemy/page/page_naming"
@@ -44,7 +44,6 @@ require_dependency "alchemy/page/page_elements"
 
 module Alchemy
   class Page < BaseRecord
-    include Alchemy::Hints
     include Alchemy::Logger
     include Alchemy::Taggable
 
@@ -116,7 +115,7 @@ module Alchemy
     has_many :site_languages, through: :site, source: :languages
     has_many :folded_pages, dependent: :destroy
     has_many :legacy_urls, class_name: "Alchemy::LegacyPageUrl", dependent: :destroy
-    has_many :nodes, class_name: "Alchemy::Node", inverse_of: :page
+    has_many :nodes, class_name: "Alchemy::Node", inverse_of: :page, dependent: :restrict_with_error
     has_many :versions, class_name: "Alchemy::PageVersion", inverse_of: :page, dependent: :destroy
     has_one :draft_version, -> { drafts }, class_name: "Alchemy::PageVersion"
     has_one :public_version, -> { published }, class_name: "Alchemy::PageVersion", autosave: -> { persisted? }
@@ -132,11 +131,6 @@ module Alchemy
 
     before_create -> { versions.build },
       if: -> { versions.none? }
-
-    before_destroy if: -> { nodes.any? } do
-      errors.add(:nodes, :still_present)
-      throw(:abort)
-    end
 
     before_save :set_language_code,
       if: -> { language.present? }
@@ -156,7 +150,7 @@ module Alchemy
     after_update :touch_nodes
 
     # Concerns
-    include PageLayouts
+    include Definitions
     include PageScopes
     include PageNatures
     include PageNaming
@@ -164,6 +158,7 @@ module Alchemy
 
     # site_name accessor
     delegate :name, to: :site, prefix: true, allow_nil: true
+    delegate :has_hint?, :hint, to: :definition
 
     # Class methods
     #
@@ -238,13 +233,13 @@ module Alchemy
 
         clipboard_pages = all_from_clipboard(clipboard)
         allowed_page_layouts = Alchemy::Page.selectable_layouts(language_id, layoutpages: layoutpages)
-        allowed_page_layout_names = allowed_page_layouts.collect { |p| p["name"] }
+        allowed_page_layout_names = allowed_page_layouts.collect(&:name)
         clipboard_pages.select { |cp| allowed_page_layout_names.include?(cp.page_layout) }
       end
 
       def link_target_options
         options = [[Alchemy.t(:default, scope: "link_target_options"), ""]]
-        link_target_options = Alchemy.config.get(:link_target_options)
+        link_target_options = Alchemy.config.link_target_options
         link_target_options.each do |option|
           # add an underscore to the options to provide the default syntax
           # @link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#target
@@ -252,6 +247,11 @@ module Alchemy
             default: option.to_s.humanize), "_#{option}"]
         end
         options
+      end
+
+      # Allow all string and text attributes to be searchable by Ransack.
+      def ransackable_attributes(_auth_object = nil)
+        searchable_alchemy_resource_attributes + ["updated_at"]
       end
     end
 

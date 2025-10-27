@@ -1,5 +1,4 @@
 Alchemy.configure do |config|
-  <% default_config = Alchemy::Configurations::Main.new %>
   # == This is the global Alchemy configuration file
   #
 
@@ -9,15 +8,15 @@ Alchemy.configure do |config|
   #
   # NOTE: This is only active in production environments
   #
-  # config.auto_logout_time = <%= default_config.auto_logout_time.inspect %>
+  # config.auto_logout_time = <%= @default_config.auto_logout_time.inspect %>
 
   # === Page caching
   #
   # Enable/Disable page caching globally.
   #
-  # NOTE: You can enable/disable page caching for single Alchemy::PageLayouts in the page_layout.yml file.
+  # NOTE: You can enable/disable page caching for single Alchemy::Definitions in the page_layout.yml file.
   #
-  # config.cache_pages = <%= default_config.cache_pages.inspect %>
+  # config.cache_pages = <%= @default_config.cache_pages.inspect %>
 
   # === Sitemap
   #
@@ -31,14 +30,14 @@ Alchemy.configure do |config|
   #   show_flag [Boolean] # Enables the Checkbox in Page#update overlay. So your customer can set the visibility of pages in the sitemap.
   #
   # config.sitemap.tap do |sitemap|
-  #   sitemap.show_root = <%= default_config.sitemap.show_root.inspect %>
-  #   sitemap.show_flag = <%= default_config.sitemap.show_flag.inspect %>
+  #   sitemap.show_root = <%= @default_config.sitemap.show_root.inspect %>
+  #   sitemap.show_flag = <%= @default_config.sitemap.show_flag.inspect %>
   # end
 
   # === Default items per page in admin views
   #
   # In Alchemy's Admin, change how many items you would get shown per page by Kaminari
-  # config.items_per_page = <%= default_config.items_per_page %>
+  # config.items_per_page = <%= @default_config.items_per_page %>
 
   # === Preview window URL configuration
   #
@@ -87,23 +86,23 @@ Alchemy.configure do |config|
   #
   # NOTE: You can always override the output format in the settings of your ingredients in elements.yml, I.E. {format: 'gif'}
   #
-  # config.output_image_quality = <%= default_config.output_image_quality %>
-  # config.preprocess_image_resize = <%= default_config.preprocess_image_resize.inspect %>
-  # config.image_output_format = <%= default_config.image_output_format.inspect %>
+  # config.output_image_quality = <%= @default_config.output_image_quality %>
+  # config.preprocess_image_resize = <%= @default_config.preprocess_image_resize.inspect %>
+  # config.image_output_format = <%= @default_config.image_output_format.inspect %>
 
   # This is used by the seeder to create the default site.
   # config.default_site.tap do |default_site|
-  #   default_site.name = <%= default_config.default_site.name.inspect %>
-  #   default_site.host = <%= default_config.default_site.host.inspect %>
+  #   default_site.name = <%= @default_config.default_site.name.inspect %>
+  #   default_site.host = <%= @default_config.default_site.host.inspect %>
   # end
 
   # This is the default language when seeding.
-  # config.default_language.tap do |default_language|
-  #   default_language.code = <%= default_config.default_language.code.inspect %>
-  #   default_language.name = <%= default_config.default_language.name.inspect %>
-  #   default_language.page_layout = <%= default_config.default_language.page_layout.inspect %>
-  #   default_language.frontpage_name = <%= default_config.default_language.frontpage_name.inspect %>
-  # end
+  config.default_language.tap do |default_language|
+    default_language.code = <%= @default_config.default_language.code.inspect %>
+    default_language.name = <%= @default_config.default_language.name.inspect %>
+    # default_language.page_layout = <%= @default_config.default_language.page_layout.inspect %>
+    # default_language.frontpage_name = <%= @default_config.default_language.frontpage_name.inspect %>
+  end
 
   # === Mailer Settings:
   #
@@ -115,7 +114,7 @@ Alchemy.configure do |config|
   #
   # ==== Options:
   #
-  #   page_layout_name:           [String] # A +Alchemy::PageLayout+ name. Used to render the contactform on a page with this layout.
+  #   page_layout_name:           [String] # A +Alchemy::PageDefinition+ name. Used to render the contactform on a page with this layout.
   #   fields:                     [Array]  # An Array of fieldnames.
   #   validate_fields:            [Array]  # An Array of fieldnames to be validated on presence.
   #
@@ -132,14 +131,14 @@ Alchemy.configure do |config|
   #           firstname: Vorname
   #
   # config.mailer.tap do |mailer|
-  #   mailer.page_layout_name = <%= default_config.mailer.page_layout_name.inspect %>
-  #   mailer.forward_to_page = <%= default_config.mailer.forward_to_page.inspect %>
-  #   mailer.mail_success_page = <%= default_config.mailer.mail_success_page.inspect %>
-  #   mailer.mail_from = <%= default_config.mailer.mail_from.inspect %>
-  #   mailer.mail_to = <%= default_config.mailer.mail_to.inspect %>
-  #   mailer.subject = <%= default_config.mailer.subject.inspect %>
-  #   mailer.fields = <%= default_config.mailer.fields.inspect %>
-  #   mailer.validate_fields = <%= default_config.mailer.validate_fields.inspect %>
+  #   mailer.page_layout_name = <%= @default_config.mailer.page_layout_name.inspect %>
+  #   mailer.forward_to_page = <%= @default_config.mailer.forward_to_page.inspect %>
+  #   mailer.mail_success_page = <%= @default_config.mailer.mail_success_page.inspect %>
+  #   mailer.mail_from = <%= @default_config.mailer.mail_from.inspect %>
+  #   mailer.mail_to = <%= @default_config.mailer.mail_to.inspect %>
+  #   mailer.subject = <%= @default_config.mailer.subject.inspect %>
+  #   mailer.fields = <%= @default_config.mailer.fields.inspect %>
+  #   mailer.validate_fields = <%= @default_config.mailer.validate_fields.inspect %>
   # end
 
   # === User roles
@@ -158,7 +157,7 @@ Alchemy.configure do |config|
   #     user_roles:
   #       rolename: Name of the role
   #
-  # config.user_roles = <%= default_config.user_roles.inspect %>
+  # config.user_roles = <%= @default_config.user_roles.inspect %>
 
   # === Uploader Settings
   #
@@ -168,11 +167,11 @@ Alchemy.configure do |config|
   # *) Allow filetypes to upload. Pass * to allow all kind of files.
   #
   # config.uploader.tap do |uploader|
-  #   uploader.upload_limit = <%= default_config.uploader.upload_limit.inspect %>
-  #   uploader.file_size_limit = <%= default_config.uploader.file_size_limit.inspect %>
+  #   uploader.upload_limit = <%= @default_config.uploader.upload_limit.inspect %>
+  #   uploader.file_size_limit = <%= @default_config.uploader.file_size_limit.inspect %>
   #   uploader.allowed_filetypes.tap do |file_types|
-  #     file_types.alchemy_attachments = <%= default_config.uploader.allowed_filetypes.alchemy_attachments.inspect %>
-  #     file_types.alchemy_pictures = <%= default_config.uploader.allowed_filetypes.alchemy_pictures.inspect %>
+  #     file_types.alchemy_attachments = <%= @default_config.uploader.allowed_filetypes.alchemy_attachments.inspect %>
+  #     file_types.alchemy_pictures = <%= @default_config.uploader.allowed_filetypes.alchemy_pictures.inspect %>
   #   end
   # end
 
@@ -187,11 +186,86 @@ Alchemy.configure do |config|
   #
   #   jQuery(a[data-link-target="overlay"]).dialog();
   #
-  # config.link_target_options = <%= default_config.link_target_options.inspect %>
+  # config.link_target_options = <%= @default_config.link_target_options.inspect %>
+
+  # === Format matchers
+  #
+  # Named aliases for regular expressions that can be used in various places.
+  # The most common use case is the format validation of ingredients, or attribute validations of your individual models.
+  #
+  # == Example:
+  #
+  #   validates_format_of :url, with: Alchemy.config.format_matchers.url
+  #
+  # config.format_matchers.tap do |format|
+  #   format.email = <%= @default_config.format_matchers.email.inspect %>
+  #   format.url = <%= @default_config.format_matchers.url.inspect %>
+  #   format.link_url = <%= @default_config.format_matchers.link_url.inspect %>
+  # end
 
   # The layout used for rendering the +alchemy/admin/pages#show+ action.
-  # config.admin_page_preview_layout = <%= default_config.admin_page_preview_layout.inspect %>
+  # config.admin_page_preview_layout = <%= @default_config.admin_page_preview_layout.inspect %>
 
   # The sizes for the preview size select in the page editor.
-  # config.page_preview_sizes = <%= default_config.page_preview_sizes.inspect %>
+  # config.page_preview_sizes = <%= @default_config.page_preview_sizes.inspect %>
+
+  # Enable full text search configuration
+  #
+  # It enables a searchable checkbox in the page form to toggle
+  # the searchable field. These information can used in a search
+  # plugin (e.g. https://github.com/AlchemyCMS/alchemy-pg_search).
+  #
+  # == Example
+  #
+  #     # config/initializers/alchemy.rb
+  #     Alchemy.config.page_searchable_checkbox = true
+  #
+  # config.show_page_searchable_checkbox = <%= @default_config.show_page_searchable_checkbox.inspect %>
+
+  # The storage adapter for Pictures and Attachments
+  #
+  config.storage_adapter = <%= @default_config.storage_adapter.inspect %>
+
+  # Additional JS modules to be imported in the Alchemy admin UI
+  #
+  # Be sure to also pin the modules with +Alchemy.importmap+.
+  #
+  # == Example
+  #
+  #    Alchemy.importmap.pin "flatpickr/de",
+  #      to: "https://ga.jspm.io/npm:flatpickr@4.6.13/dist/l10n/de.js"
+  #
+  # config.admin_js_imports << "flatpickr/de"
+
+  # Additional importmaps to be included in the Alchemy admin UI
+  #
+  # Be sure to also pin modules with +Alchemy.importmap+.
+  #
+  # config.admin_importmaps.add(
+  #   importmap_path: root.join("config/importmap.rb"),
+  #   source_paths: [
+  #     root.join("app/javascript")
+  #   ],
+  #   name: "admin_extension"
+  # )
+
+  # Additional stylesheets to be included in the Alchemy admin UI
+  # config.admin_stylesheets.add("my_app/admin_extension")
+
+  # Define page publish targets
+  #
+  # A publish target is a ActiveJob that gets performed
+  # whenever a user clicks the publish page button.
+  #
+  # Use this to trigger deployment hooks of external
+  # services in an asychronous way.
+  #
+  # config.publish_targets << "MyPublishJob"
+
+  # Configure tabs in the link dialog
+  #
+  # With this configuration that tabs in the link dialog can be extended
+  # without overwriting or defacing the Admin Interface.
+  #
+  # config.link_dialog_tabs << "Acme::LinkTab"
 end

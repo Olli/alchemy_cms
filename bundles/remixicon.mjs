@@ -12,6 +12,7 @@ const icons = [
   "Arrows/arrow-right-s-line",
   "Arrows/arrow-right-wide-line",
   "Arrows/arrow-up-line",
+  "Arrows/contract-right-line",
   "Arrows/contract-up-down-line",
   "Arrows/expand-left-line",
   "Arrows/expand-right-line",
@@ -33,6 +34,7 @@ const icons = [
   "Design/crop-line",
   "Design/edit-line",
   "Design/eraser-line",
+  "Design/palette-line",
   "Design/pencil-ruler-2-line",
   "Design/scissors-cut-line",
   "Design/table-line",
@@ -46,6 +48,7 @@ const icons = [
   "Document/file-add-line",
   "Document/file-cloud-line",
   "Document/file-copy-line",
+  "Document/file-damage-line",
   "Document/file-edit-line",
   "Document/file-excel-2-line",
   "Document/file-forbid-line",
@@ -78,6 +81,7 @@ const icons = [
   "System/add-line",
   "System/alert-line",
   "System/check-line",
+  "System/checkbox-multiple-line",
   "System/close-line",
   "System/delete-bin-2-line",
   "System/download-2-line",
@@ -90,6 +94,7 @@ const icons = [
   "System/menu-add-line",
   "System/menu-fold-line",
   "System/menu-unfold-line",
+  "System/more-line",
   "System/more-2-line",
   "System/prohibited-line",
   "System/question-line",
@@ -102,7 +107,8 @@ const icons = [
   "System/zoom-out-line",
   "User & Faces/group-line",
   "User & Faces/user-fill",
-  "User & Faces/user-line"
+  "User & Faces/user-line",
+  "User & Faces/robot-2-line"
 ]
 
 const config = {

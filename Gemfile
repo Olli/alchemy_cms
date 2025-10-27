@@ -17,8 +17,12 @@ gem "pg", "~> 1.0" if ENV["DB"] == "postgresql"
 
 gem "alchemy_i18n", github: "AlchemyCMS/alchemy_i18n", branch: "main"
 
+if ENV["ALCHEMY_STORAGE_ADAPTER"] == "active_storage"
+  gem "ruby-vips"
+end
+
 group :development, :test do
-  gem "execjs", "~> 2.9.1"
+  gem "execjs", "~> 2.10.0"
   gem "rubocop", require: false
   gem "standard", "~> 1.25", require: false
 
@@ -26,7 +30,7 @@ group :development, :test do
   gem "sprockets", "~> 4.2", ">= 4.2.1", require: false
 
   if ENV["GITHUB_ACTIONS"]
-    gem "simplecov-cobertura", "~> 2.1"
+    gem "simplecov-cobertura", "~> 3.0"
 
     # https://github.com/hotwired/turbo-rails/issues/512
     if rails_version == "7.1"
@@ -53,6 +57,7 @@ group :development, :test do
     gem "active_record_query_trace", require: false
     gem "rack-mini-profiler", require: false
     gem "brakeman", require: false
+    gem "ruby-lsp-rspec", require: false
   end
 end
 
@@ -60,15 +65,17 @@ end
 # Necessary until https://github.com/mikel/mail/pull/1439
 # got merged and released.
 if Gem.ruby_version >= Gem::Version.new("3.1.0")
-  gem "net-smtp", "~> 0.4.0", require: false
+  gem "net-smtp", "~> 0.5.1", require: false
 end
 
 gem "web-console", "~> 4.2", group: :development
 
-gem "rails_live_reload", "~> 0.4.0"
+gem "rails_live_reload", "~> 0.5.0"
 
 gem "dartsass-rails", "~> 0.5.0"
 
 gem "propshaft", "~> 1.0"
 
 gem "gem-release", "~> 2.2"
+
+gem "i18n-debug", "~> 1.2", require: false # Set to `"i18n/debug"` if you want to debug missing translations

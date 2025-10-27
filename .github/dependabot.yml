@@ -1,34 +1,33 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: "daily"
     groups:
       babel:
         dependency-type: "development"
-          patterns:
-            - "@babel/*"
-          update-types:
-            - "minor"
-            - "patch"
+        patterns:
+          - "@babel/*"
+        update-types:
+          - "minor"
+          - "patch"
       jest:
         dependency-type: "development"
-          patterns:
-            - "jest*"
-            - "babel-jest"
-          update-types:
-            - "minor"
-            - "patch"
+        patterns:
+          - "jest*"
+          - "babel-jest"
+        update-types:
+          - "minor"
+          - "patch"
       rollup:
         dependency-type: "development"
-          patterns:
-            - "@rollup/*"
-            - "rollup"
-          update-types:
-            - "minor"
-            - "patch"
-      versioning-strategy: increase-if-necessary
+        patterns:
+          - "@rollup/*"
+          - "rollup"
+        update-types:
+          - "minor"
+          - "patch"
   - package-ecosystem: "bundler"
     directory: "/"
     schedule:

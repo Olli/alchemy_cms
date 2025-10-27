@@ -1,9 +1,8 @@
 @use "../mixins";
-@use "../variables" as vars;
 
 .alchemy-image-overlay {
   &.open {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--dialog-overlay-color);
   }
 }
 
@@ -83,7 +82,7 @@
   .icon {
     font-size: 2em;
     color: var(--color-grey_light);
-    text-shadow: 0 0 4px var(--color-text);
+    text-shadow: 0 0 4px var(--text-color);
     transition: color var(--image-overlay-transition-duration) linear;
 
     &:hover {
@@ -96,8 +95,8 @@
 .picture-overlay-handle {
   position: absolute;
   top: 0;
-  background-color: var(--color-grey_light);
-  box-shadow: -2px 0 4px -2px var(--color-text);
+  background-color: var(--dialog-background-color);
+  box-shadow: var(--image-overlay-box-shadow);
   transition: right var(--image-overlay-transition-duration)
     var(--image-overlay-transition-easing);
 }
@@ -109,8 +108,7 @@
   padding: var(--spacing-2) var(--spacing-4) var(--spacing-2) var(--spacing-1);
   overflow: auto;
 
-  form .control-label,
-  .resource_info .value label {
+  form .control-label {
     text-align: left;
   }
 
@@ -120,8 +118,7 @@
 
   form .input .select2-container,
   form .input input[type="text"],
-  form .input textarea,
-  .resource_info .value p {
+  form .input textarea {
     width: 100%;
   }
 }
@@ -131,6 +128,7 @@
   height: 100%;
   right: var(--image-overlay-form-width);
   cursor: pointer;
+  transition-property: right, background-color;
 
   .icon {
     position: absolute;
@@ -138,13 +136,13 @@
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 1.2em;
-    color: var(--color-icon);
+    color: var(--icon-color);
     transition: transform var(--image-overlay-transition-duration)
       var(--image-overlay-transition-easing);
   }
 
   &:hover {
-    background-color: hsl(0deg, 0%, 89%);
+    background-color: var(--image-overlay-hover-bg-color);
   }
 }
 
@@ -177,53 +175,16 @@
     height: auto;
     max-width: 100%;
     max-height: 100%;
-    box-shadow: 0 0 var(--spacing-2) var(--color-text);
-    background: vars.$thumbnail-background;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--dialog-box-shadow);
+    background: var(--thumbnail-background);
     vertical-align: middle;
     cursor: default;
   }
 }
 
-.picture-file-infos,
-.picture-usage-info {
-  padding: var(--spacing-2) 0;
-
-  .message {
-    margin: var(--spacing-2) 0;
-  }
-}
-
-#pictures_page_list {
-  h3 {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-1);
-    padding: var(--spacing-1) var(--spacing-2) 0;
-    margin: 0;
-  }
-
-  ul {
-    padding-left: 0;
-    list-style-type: none;
-  }
-
-  .list {
-    margin: var(--spacing-2) 0;
-
-    li {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-1);
-      padding: var(--spacing-2);
-      border-radius: var(--border-radius_medium);
-      white-space: normal;
-      margin-bottom: 1em;
-    }
-  }
-
-  p {
-    margin: 0;
-  }
+.picture-form {
+  margin-bottom: var(--spacing-3);
 }
 
 .picture-overlay-navigation {
@@ -245,20 +206,16 @@
     align-items: center;
     text-decoration: none;
     transition: background-color var(--image-overlay-transition-duration) linear;
+    color: var(--color-white);
 
-    .icon {
+    alchemy-icon svg {
       width: 32px;
       height: 32px;
-      fill: var(--color-white);
       filter: drop-shadow(0 0 1px var(--color-grey_very_dark));
     }
 
     &:hover {
       background-color: rgba(0, 0, 0, 0.3);
-
-      .icon {
-        transition: fill var(--image-overlay-transition-duration) linear;
-      }
     }
   }
 
@@ -269,20 +226,20 @@
   .icon {
     --icon-size: 4em;
     fill: var(--color-grey_light);
-    filter: drop-shadow(0 0 4px var(--color-icon));
+    filter: drop-shadow(0 0 4px var(--icon-color));
     transition: all var(--image-overlay-transition-duration) linear;
     vertical-align: middle;
   }
 
   .previous-picture {
     left: 0;
-    @include mixins.border-right-radius(vars.$default-border-radius);
+    @include mixins.border-right-radius(var(--border-radius_medium));
   }
 
   .next-picture {
     right: calc(
       var(--image-overlay-form-width) + var(--picture-overlay-handle-width)
     );
-    @include mixins.border-left-radius(vars.$default-border-radius);
+    @include mixins.border-left-radius(var(--border-radius_medium));
   }
 }

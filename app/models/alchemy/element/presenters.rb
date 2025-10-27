@@ -33,7 +33,7 @@ module Alchemy
       # @see Alchemy::Element::Presenters#display_name_for
       #
       def display_name
-        self.class.display_name_for(definition["name"] || name)
+        self.class.display_name_for(definition.name || name)
       end
 
       # Returns a preview text for element.
@@ -104,8 +104,8 @@ module Alchemy
       def first_ingredient_by_definition
         return if ingredient_definitions.empty?
 
-        role = ingredient_definitions.first["role"]
-        ingredients.detect { |ingredient| ingredient.role == role }
+        role = ingredient_definitions.first.role
+        ingredients.detect { _1.role == role }
       end
     end
   end

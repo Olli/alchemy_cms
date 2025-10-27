@@ -106,7 +106,12 @@ module Alchemy
     def load_index_page
       @page ||= Language.current_root_page
       Current.page = @page
-      render template: "alchemy/welcome", layout: false if signup_required?
+
+      if signup_required? && @page.nil?
+        render template: "alchemy/welcome", layout: false
+      elsif !@page&.public?
+        render template: "alchemy/no_index", layout: false
+      end
     end
 
     # == Loads page by urlname
@@ -186,13 +191,25 @@ module Alchemy
       if must_not_cache?
         expires_now
       else
-        expires_in @page.expiration_time, public: !@page.restricted, must_revalidate: true
+        expires_in @page.expiration_time, {public: !@page.restricted}.merge(caching_options)
+      end
+    end
+
+    def caching_options
+      if Alchemy.config.page_cache.stale_while_revalidate
+        {
+          stale_while_revalidate: Alchemy.config.page_cache.stale_while_revalidate
+        }
+      else
+        {
+          must_revalidate: true
+        }
       end
     end
 
     def signup_required?
       if Alchemy.user_class.respond_to?(:admins)
-        Alchemy.user_class.admins.empty? && @page.nil?
+        Alchemy.user_class.admins.empty?
       end
     end
 
@@ -224,7 +241,12 @@ module Alchemy
 
     # don't cache pages if we have flash message to display or the page has caching disabled
     def must_not_cache?
-      flash.present? || !@page.cache_page?
+      !caching_enabled? || !@page.cache_page? || flash.present?
+    end
+
+    def caching_enabled?
+      Rails.application.config.action_controller.perform_caching &&
+        Alchemy.config.cache_pages
     end
 
     def page_not_found!

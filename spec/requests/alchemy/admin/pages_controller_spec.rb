@@ -12,6 +12,12 @@ module Alchemy
         get admin_pages_path
         expect(request).to redirect_to(Alchemy.login_path)
       end
+
+      it "can not access page preview of a public page" do
+        page = create(:alchemy_page, :public)
+        get admin_page_path(page)
+        expect(request).to redirect_to(Alchemy.login_path)
+      end
     end
 
     context "a member" do
@@ -20,6 +26,12 @@ module Alchemy
       it "can not access page tree" do
         get admin_pages_path
         expect(request).to redirect_to(root_path)
+      end
+
+      it "can not access page preview of a public page" do
+        page = create(:alchemy_page, :public)
+        get admin_page_path(page)
+        expect(request).to redirect_to("/")
       end
     end
 
@@ -274,6 +286,11 @@ module Alchemy
         let(:language) { create(:alchemy_language, locale: "nl") }
         let!(:page) { create(:alchemy_page, language: language) }
 
+        it "can be accessed" do
+          get admin_page_path(page)
+          expect(response).to be_successful
+        end
+
         it "should assign @preview_mode with true" do
           get admin_page_path(page)
           expect(assigns(:preview_mode)).to eq(true)
@@ -296,7 +313,7 @@ module Alchemy
 
         context "when layout is set to custom" do
           before do
-            stub_alchemy_config(:admin_page_preview_layout, "custom")
+            stub_alchemy_config(admin_page_preview_layout: "custom")
           end
 
           it "it renders custom layout instead" do

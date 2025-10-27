@@ -3,6 +3,8 @@
 module Alchemy
   module Admin
     class ElementsController < Alchemy::Admin::BaseController
+      helper Alchemy::Admin::IngredientsHelper
+
       before_action :load_element, only: [:update, :destroy, :collapse, :expand, :publish]
       authorize_resource class: Alchemy::Element
 
@@ -35,7 +37,7 @@ module Alchemy
           else
             Element.new(create_element_params)
           end
-          if @page.definition["insert_elements_at"] == "top"
+          if @page.definition.insert_elements_at == "top"
             @insert_at_top = true
             @element.position = 1
           end

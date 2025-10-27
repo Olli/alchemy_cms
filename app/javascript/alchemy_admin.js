@@ -12,7 +12,6 @@ import { currentDialog, closeCurrentDialog } from "alchemy_admin/dialog"
 import Dirty from "alchemy_admin/dirty"
 import * as FixedElements from "alchemy_admin/fixed_elements"
 import { growl } from "alchemy_admin/growler"
-import ImageLoader from "alchemy_admin/image_loader"
 import Initializer from "alchemy_admin/initializer"
 import { LinkDialog } from "alchemy_admin/link_dialog"
 import pleaseWaitOverlay from "alchemy_admin/please_wait_overlay"
@@ -20,10 +19,7 @@ import Sitemap from "alchemy_admin/sitemap"
 import Spinner from "alchemy_admin/spinner"
 import PagePublicationFields from "alchemy_admin/page_publication_fields"
 import { reloadPreview } from "alchemy_admin/components/preview_window"
-import {
-  openConfirmDialog,
-  confirmToDeleteDialog
-} from "alchemy_admin/confirm_dialog"
+import { openConfirmDialog } from "alchemy_admin/confirm_dialog"
 
 // Web Components
 import "alchemy_admin/components"
@@ -47,17 +43,14 @@ Object.assign(Alchemy, {
   t: translate, // Global utility method for translating a given string
   FixedElements,
   growl,
-  ImageLoader: ImageLoader.init,
   LinkDialog,
   pleaseWaitOverlay,
   Sitemap,
   Spinner,
   PagePublicationFields,
-  reloadPreview,
-  openConfirmDialog,
-  confirmToDeleteDialog
+  reloadPreview
 })
 
 Rails.start()
-
+Turbo.config.forms.confirm = openConfirmDialog
 $(document).on("turbo:load", Initializer)

@@ -16,7 +16,7 @@ Gem::Specification.new do |gem|
   gem.requirements << "ImageMagick (libmagick), v6.6 or greater."
   gem.required_ruby_version = ">= 3.1.0"
   gem.license = "BSD-3-Clause"
-  gem.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^spec/|bun\.lockdb|package\.json|^\.}) }
+  gem.files = Dir["{app,config,db,lib,vendor}/**/*", "LICENSE", "README.md"]
   gem.require_paths = ["lib"]
 
   gem.metadata["homepage_uri"] = gem.homepage
@@ -30,10 +30,11 @@ Gem::Specification.new do |gem|
     activejob
     activemodel
     activerecord
+    activestorage
     activesupport
     railties
   ].each do |rails_gem|
-    gem.add_runtime_dependency rails_gem, [">= 7.0", "< 8.1"]
+    gem.add_runtime_dependency rails_gem, [">= 7.1", "< 8.1"]
   end
 
   gem.add_runtime_dependency "active_model_serializers", ["~> 0.10.14"]
@@ -42,24 +43,29 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "cancancan", [">= 2.1", "< 4.0"]
   gem.add_runtime_dependency "csv", ["~> 3.3"]
   gem.add_runtime_dependency "dragonfly", ["~> 1.4"]
-  gem.add_runtime_dependency "dragonfly_svg", ["~> 0.0.4"]
   gem.add_runtime_dependency "gutentag", ["~> 2.2", ">= 2.2.1"]
+  gem.add_runtime_dependency "image_processing", ["~> 1.14"]
   gem.add_runtime_dependency "importmap-rails", ["~> 2.0"]
   gem.add_runtime_dependency "kaminari", ["~> 1.1"]
   gem.add_runtime_dependency "originator", ["~> 3.1"]
   gem.add_runtime_dependency "ransack", [">= 1.8", "< 5.0"]
   gem.add_runtime_dependency "simple_form", [">= 4.0", "< 6"]
   gem.add_runtime_dependency "turbo-rails", [">= 1.4", "< 2.1"]
-  gem.add_runtime_dependency "view_component", ["~> 3.0"]
+  gem.add_runtime_dependency "view_component", ">= 3", "< 5"
 
   gem.add_development_dependency "capybara", ["~> 3.0"]
   gem.add_development_dependency "capybara-screenshot", ["~> 1.0"]
   gem.add_development_dependency "capybara-shadowdom", ["~> 0.3"]
   gem.add_development_dependency "factory_bot_rails", ["~> 6.0"]
-  gem.add_development_dependency "puma", ["~> 6.0"]
+  gem.add_development_dependency "puma", "~> 7.0"
   gem.add_development_dependency "rails-controller-testing", ["~> 1.0"]
   gem.add_development_dependency "rspec-activemodel-mocks", ["~> 1.0"]
-  gem.add_development_dependency "rspec-rails", ["~> 7.1"]
+  case ENV.fetch("RAILS_VERSION", "8.0")
+  when "7.1"
+    gem.add_development_dependency "rspec-rails", ["~> 7.1"]
+  else
+    gem.add_development_dependency "rspec-rails", ["~> 8.0"]
+  end
   gem.add_development_dependency "simplecov", ["~> 0.20"]
   gem.add_development_dependency "selenium-webdriver", ["~> 4.10"]
   gem.add_development_dependency "webmock", ["~> 3.3"]

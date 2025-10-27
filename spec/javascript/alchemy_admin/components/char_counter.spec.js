@@ -1,7 +1,12 @@
 import "alchemy_admin/components/char_counter"
 import { renderComponent, setupLanguage } from "./component.helper"
+import { setupTranslations } from "../translations.helper.js"
 
 describe("alchemy-char-counter", () => {
+  beforeEach(() => {
+    setupLanguage()
+  })
+
   /**
    *
    * @type {HTMLElement | undefined}
@@ -17,8 +22,6 @@ describe("alchemy-char-counter", () => {
   }
 
   beforeEach(() => {
-    setupLanguage()
-
     const html = `
       <alchemy-char-counter>
         <input type="text">

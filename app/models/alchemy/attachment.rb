@@ -23,22 +23,16 @@ module Alchemy
     include Alchemy::NameConversions
     include Alchemy::Taggable
     include Alchemy::TouchElements
+    include Alchemy::RelatableResource
 
-    dragonfly_accessor :file, app: :alchemy_attachments do
-      after_assign { |f| write_attribute(:file_mime_type, f.mime_type) }
-    end
+    include Alchemy.storage_adapter.attachment_class_methods
 
     stampable stamper_class_name: Alchemy.user_class_name
 
-    has_many :file_ingredients,
-      class_name: "Alchemy::Ingredients::File",
-      foreign_key: "related_object_id",
-      inverse_of: :related_object
+    scope :by_file_type, ->(file_type) do
+      Alchemy.storage_adapter.by_file_type_scope(file_type)
+    end
 
-    has_many :elements, through: :file_ingredients
-    has_many :pages, through: :elements
-
-    scope :by_file_type, ->(file_type) { where(file_mime_type: file_type) }
     scope :recent, -> { where("#{table_name}.created_at > ?", Time.current - 24.hours).order(:created_at) }
     scope :without_tag, -> { left_outer_joins(:taggings).where(gutentag_taggings: {id: nil}) }
 
@@ -46,9 +40,8 @@ module Alchemy
     class << self
       # The class used to generate URLs for attachments
       #
-      # @see Alchemy::Attachment::Url
       def url_class
-        @_url_class ||= Alchemy::Attachment::Url
+        @_url_class ||= Alchemy.storage_adapter.attachment_url_class
       end
 
       # Set a different attachment url class
@@ -66,39 +59,43 @@ module Alchemy
       end
 
       def searchable_alchemy_resource_attributes
-        %w[name file_name]
+        Alchemy.storage_adapter.searchable_alchemy_resource_attributes(name)
+      end
+
+      def ransackable_attributes(_auth_object = nil)
+        Alchemy.storage_adapter.ransackable_attributes(name)
+      end
+
+      def ransackable_associations(_auth_object = nil)
+        Alchemy.storage_adapter.ransackable_associations(name)
       end
 
       def file_types(scope = all)
-        scope.reorder(:file_mime_type).distinct.pluck(:file_mime_type)
-          .map { [Alchemy.t(_1, scope: "mime_types"), _1] }
-          .sort_by(&:first)
+        Alchemy.storage_adapter.file_formats(name, scope:)
       end
 
       def allowed_filetypes
-        Alchemy.config.get(:uploader).fetch("allowed_filetypes", {}).fetch("alchemy/attachments", [])
+        Alchemy.config.uploader.allowed_filetypes.alchemy_attachments
       end
 
       def ransackable_scopes(_auth_object = nil)
-        %i[by_file_type recent last_upload without_tag]
+        %i[by_file_type recent last_upload without_tag deletable]
       end
     end
 
     validates_presence_of :file
-    validates_size_of :file, maximum: Alchemy.config.get(:uploader)["file_size_limit"].megabytes
+    validates_size_of :file, maximum: Alchemy.config.uploader.file_size_limit.megabytes
     validate :file_type_allowed,
       unless: -> { self.class.allowed_filetypes.include?("*") }
 
-    before_save :set_name, if: :file_name_changed?
+    before_save :set_name, if: -> { Alchemy.storage_adapter.set_attachment_name?(self) }
 
     scope :with_file_type, ->(file_type) { where(file_mime_type: file_type) }
 
     # Instance methods
 
     def url(options = {})
-      if file
-        self.class.url_class.new(self).call(options)
-      end
+      self.class.url_class.new(self).call(options)
     end
 
     # An url save filename without format suffix
@@ -111,9 +108,23 @@ module Alchemy
       pages.any? && pages.not_restricted.blank?
     end
 
+    # File name
+    def file_name
+      Alchemy.storage_adapter.file_name(self)
+    end
+
+    # File size
+    def file_size
+      Alchemy.storage_adapter.file_size(self)
+    end
+
+    def file_mime_type
+      Alchemy.storage_adapter.file_mime_type(self)
+    end
+
     # File format suffix
     def extension
-      file_name.split(".").last
+      Alchemy.storage_adapter.file_extension(self)
     end
 
     alias_method :suffix, :extension
@@ -150,14 +161,13 @@ module Alchemy
     private
 
     def file_type_allowed
-      symbol = Mime::Type.lookup(file_mime_type)&.symbol&.to_s.presence
-      unless symbol&.in?(self.class.allowed_filetypes)
-        errors.add(:image_file, Alchemy.t("not a valid file"))
+      unless extension&.in?(self.class.allowed_filetypes)
+        errors.add(:file, Alchemy.t("not a valid file"))
       end
     end
 
     def set_name
-      self.name = convert_to_humanized_name(file_name, file.ext)
+      self.name ||= convert_to_humanized_name(file_name, extension)
     end
   end
 end

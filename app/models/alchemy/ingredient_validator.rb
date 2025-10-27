@@ -64,7 +64,7 @@ module Alchemy
     attr_reader :ingredient
 
     def validations
-      ingredient.definition.fetch(:validate, [])
+      ingredient.definition.validate
     end
 
     def validate_presence(*)
@@ -81,7 +81,7 @@ module Alchemy
 
     def validate_format(format)
       matcher = if format.is_a?(String) || format.is_a?(Symbol)
-        Alchemy.config.get("format_matchers").get(format)
+        Alchemy.config.format_matchers.get(format)
       else
         format
       end

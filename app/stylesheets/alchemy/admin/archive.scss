@@ -1,9 +1,16 @@
 @use "../extends";
 @use "../mixins";
-@use "../variables" as vars;
+
+alchemy-uploader {
+  display: inline-block;
+}
 
 .resources-header {
   padding: 0 var(--spacing-2);
+
+  h2 {
+    margin: var(--spacing-3) 0;
+  }
 }
 
 .resources-table-wrapper {
@@ -17,7 +24,7 @@
 
 .selected_item_tools {
   margin: calc(-1 * var(--spacing-2));
-  border-bottom: 1px solid vars.$default-border-color;
+  border-bottom: 1px solid var(--border-color);
   margin-bottom: var(--spacing-4);
   padding: var(--spacing-4);
 
@@ -31,10 +38,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 1px 1px vars.$default-border-color;
+  background-color: var(--picture-thumbnail-background-color, transparent);
+
+  &:not(:has(alchemy-icon)) {
+    box-shadow: 0 0 1px 1px var(--border-color);
+  }
 
   &:hover {
     text-decoration: none;
+  }
+
+  alchemy-icon {
+    display: flex;
+    width: var(--picture-width);
+    height: var(--picture-height);
   }
 }
 
@@ -49,7 +66,7 @@
   border-radius: var(--picture-thumbnail-border-radius);
   padding: var(--spacing-2);
   padding-bottom: 2.5em;
-  transition: all vars.$transition-duration;
+  transition: all var(--transition-duration);
 
   img,
   .thumbnail_background {
@@ -61,7 +78,7 @@
     max-height: 100%;
 
     &:not([src*="alchemy/missing-image"]) {
-      background: vars.$thumbnail-background;
+      background: var(--thumbnail-background);
     }
 
     &[src*=".svg"]:not([src*="alchemy/missing-image"]) {
@@ -95,7 +112,7 @@
   &:hover,
   &:focus-within,
   &.active {
-    box-shadow: 0 0 4px 2px vars.$default-border-color;
+    box-shadow: 0 0 4px 2px var(--border-color);
 
     .picture_tool.select {
       visibility: visible;
@@ -155,20 +172,22 @@ div.assign_image_list_image {
 
 .picture_tool {
   display: flex;
-  width: 20px;
-  height: 20px;
+  width: var(--spacing-6);
+  height: var(--spacing-6);
   align-items: center;
   justify-content: center;
   position: absolute;
-  background-color: white;
+  background-color: var(--picture-tool-background-color);
   top: var(--spacing-1);
-  padding: var(--spacing-0);
+  padding: var(--spacing-1);
   z-index: 10;
-  border-radius: vars.$default-border-radius;
+  border-radius: var(--border-radius_medium);
   box-shadow: 0 0 1px var(--color-grey_dark);
 
   &:hover {
     text-decoration: none;
+    background-color: var(--picture-tool-hover-background-color);
+    transition: background-color var(--transition-duration);
   }
 
   &.visible {
@@ -220,7 +239,7 @@ div.assign_image_list_image {
   pointer-events: none;
 
   .tag {
-    box-shadow: 0 0 2px 2px vars.$default-border-color;
+    box-shadow: 0 0 2px 2px var(--border-color);
   }
 }
 
@@ -228,23 +247,23 @@ div.assign_image_list_image {
 .picture_tool {
   visibility: hidden;
   opacity: 0;
-  transition: opacity vars.$transition-duration;
+  transition: opacity var(--transition-duration);
 }
 
 div#library_sidebar {
   display: flex;
   flex-direction: column;
   position: fixed;
-  border-left: 1px solid vars.$default-border-color;
+  border-left: 1px solid var(--border-color);
   top: 0;
   right: 0;
-  width: 232px;
+  width: var(--sidebar-width);
 
-  padding: calc(#{vars.$top-menu-height} + var(--spacing-2)) var(--spacing-4)
-    calc(#{vars.$pagination-height} + var(--spacing-2)) var(--spacing-4);
+  padding: calc(var(--top-menu-height) + var(--spacing-2)) var(--spacing-4)
+    calc(var(--pagination-height) + var(--spacing-2)) var(--spacing-4);
   height: 100%;
   z-index: 3;
-  background-color: var(--color-grey_very_light);
+  background-color: var(--sidebar-background-color);
 
   h2 {
     margin-top: var(--spacing-4);
@@ -261,7 +280,7 @@ div#library_sidebar {
 
 .alchemy-dialog-body {
   #library_sidebar {
-    padding: 0 var(--spacing-4);
+    padding: 0 var(--spacing-4) var(--pagination-height);
   }
 }
 
@@ -284,19 +303,23 @@ div#library_sidebar {
     box-shadow: none;
 
     .thumbnail_background {
-      box-shadow: 0 0 4px 4px vars.$default-border-color;
+      box-shadow: 0 0 4px 4px var(--border-color);
     }
   }
 }
 
 #overlay_file_list {
+  max-height: 100%;
+  overflow-y: auto;
+  padding-bottom: var(--pagination-height);
+
   .assign_file_file {
     display: block;
     margin-bottom: var(--spacing-1);
     word-break: break-all;
 
     &:hover {
-      background-color: var(--color-yellow_light);
+      background-color: var(--table-row-hover-color);
     }
   }
 

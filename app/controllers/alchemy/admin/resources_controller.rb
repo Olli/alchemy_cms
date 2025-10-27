@@ -9,7 +9,7 @@ module Alchemy
       extend Alchemy::Admin::ResourceName
       include Alchemy::Admin::ResourceFilter
 
-      helper Alchemy::ResourcesHelper, TagsHelper
+      helper Alchemy::ResourcesHelper
       helper_method :resource_handler, :items_per_page, :items_per_page_options
 
       before_action :load_resource,
@@ -128,17 +128,17 @@ module Alchemy
       # @see Alchemy::Resource#editable_attributes
       def resource_params
         params.require(resource_handler.namespaced_resource_name).permit(
-          resource_handler.editable_attributes.map { _1[:name] }
+          resource_handler.permitted_attributes
         )
       end
 
       def items_per_page
         cookies[:alchemy_items_per_page] =
-          params[:per_page] || cookies[:alchemy_items_per_page] || Alchemy.config.get(:items_per_page)
+          params[:per_page] || cookies[:alchemy_items_per_page] || Alchemy.config.items_per_page
       end
 
       def items_per_page_options
-        per_page = Alchemy.config.get(:items_per_page)
+        per_page = Alchemy.config.items_per_page
         [per_page, per_page * 2, per_page * 4]
       end
 

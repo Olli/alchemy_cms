@@ -1,37 +1,12 @@
 require "rails_helper"
 
 RSpec.describe Alchemy do
-  describe ".admin_importmaps" do
-    subject { Alchemy.admin_importmaps }
+  describe ".preview_sources" do
+    subject { Alchemy.preview_sources }
 
-    it "returns a Set of admin importmaps" do
-      is_expected.to be_a(Set)
-    end
-
-    it "includes alchemy_admin importmap" do
-      expect(subject.first).to eq({
-        importmap_path: Alchemy::Engine.root.join("config/importmap.rb"),
-        name: "alchemy_admin",
-        source_paths: [
-          Alchemy::Engine.root.join("app/javascript"),
-          Alchemy::Engine.root.join("vendor/javascript")
-        ]
-      })
-    end
-
-    context "with additional importmaps" do
-      before do
-        Alchemy.admin_importmaps.add({
-          importmap_path: Rails.root.join("config/importmap.rb"),
-          name: "additional_importmap",
-          source_paths: [Rails.root.join("app/javascript")]
-        })
-      end
-
-      it "adds additional importmap to admin imports" do
-        initializer = Alchemy::Engine.initializers.find { _1.name == "alchemy.importmap" }
-        expect(Alchemy.admin_js_imports).to receive(:add).with("additional_importmap")
-        initializer.run(Rails.application)
+    it "returns a Set of preview sources" do
+      Alchemy::Deprecation.silence do
+        is_expected.to be_a(Alchemy::Configuration::CollectionOption)
       end
     end
   end
@@ -57,21 +32,21 @@ RSpec.describe Alchemy do
 
     describe "format matchers" do
       describe "email" do
-        subject { Alchemy.config.get("format_matchers")["email"] }
+        subject { Alchemy.config.format_matchers.email }
 
         it { is_expected.to match("hello@gmail.com") }
         it { is_expected.not_to match("stulli@gmx") }
       end
 
       describe "url" do
-        subject { Alchemy.config.get("format_matchers")["url"] }
+        subject { Alchemy.config.format_matchers.url }
 
         it { is_expected.to match("www.example.com:80/about") }
         it { is_expected.not_to match('www.example.com:80\/about') }
       end
 
       describe "link_url" do
-        subject { Alchemy.config.get("format_matchers")["link_url"] }
+        subject { Alchemy.config.format_matchers.link_url }
 
         it { is_expected.to match("tel:12345") }
         it { is_expected.to match("mailto:stulli@gmx.de") }
@@ -80,6 +55,20 @@ RSpec.describe Alchemy do
         it { is_expected.not_to match('\/brehmstierleben') }
         it { is_expected.not_to match('https:\/\/example.com/home') }
       end
+    end
+  end
+
+  describe "admin_importmaps" do
+    subject { Alchemy.config.admin_importmaps }
+    it "includes alchemy_admin importmap" do
+      expect(subject.first.to_h).to eq({
+        importmap_path: Alchemy::Engine.root.join("config/importmap.rb"),
+        name: "alchemy_admin",
+        source_paths: [
+          Alchemy::Engine.root.join("app/javascript"),
+          Alchemy::Engine.root.join("vendor/javascript")
+        ]
+      })
     end
   end
 

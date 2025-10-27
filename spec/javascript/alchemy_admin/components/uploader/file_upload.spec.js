@@ -1,10 +1,10 @@
+import { vi } from "vitest"
 import { FileUpload } from "alchemy_admin/components/uploader/file_upload"
-import mock from "xhr-mock"
 import { growl } from "alchemy_admin/growler"
 
-jest.mock("alchemy_admin/growler", () => {
+vi.mock("alchemy_admin/growler", () => {
   return {
-    growl: jest.fn()
+    growl: vi.fn()
   }
 })
 
@@ -31,26 +31,39 @@ describe("alchemy-file-upload", () => {
     const body =
       typeof response === "string" ? response : JSON.stringify(response)
 
-    mock.setup()
-    mock.post("/admin/pictures", {
+    const request = {
       status,
-      reason,
-      body
-    })
+      statusText: reason,
+      responseText: body,
+      abort: vi.fn(),
+      open: vi.fn(),
+      send: vi.fn(),
+      upload: {
+        onprogress: null
+      },
+      onload: null,
+      onerror: null
+    }
 
-    let request = new XMLHttpRequest()
-    request.abort = jest.fn() // necessary to test abort mechanic
+    // Simulate the request lifecycle
+    request.send = vi.fn(() => {
+      // Simulate async behavior but resolve immediately for tests
+      if (request.onload) {
+        request.onload()
+      }
+    })
 
     return request
   }
 
   /**
-   * initialize file progress component with the correct constructor
+   * initialize file progress component with the correct initialization
    * @param {File} file the default file has a size of 100 B
    * @param {XMLHttpRequest} request default request
    */
   const renderComponent = (file = testFile, request = mockXMLHttpRequest()) => {
-    component = new FileUpload(file, request)
+    component = new FileUpload()
+    component.initialize(file, request)
     document.body.innerHTML = "" // reset previous content to prevent raise conditions
     document.body.append(component)
 
@@ -66,7 +79,7 @@ describe("alchemy-file-upload", () => {
     // ignore missing translation warnings
     global.console = {
       ...console,
-      warn: jest.fn()
+      warn: vi.fn()
     }
   })
 
@@ -83,7 +96,9 @@ describe("alchemy-file-upload", () => {
     renderComponent()
   })
 
-  afterEach(() => mock.teardown())
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
 
   describe("Initial State", () => {
     it("should render a progress bar", () => {
@@ -117,11 +132,11 @@ describe("alchemy-file-upload", () => {
     describe("with image file", () => {
       beforeEach(() => {
         // mock file reader to response with an (invalid) image
-        jest.spyOn(global, "FileReader").mockImplementation(function () {
-          this.readAsDataURL = jest.fn()
-          this.addEventListener = (methodName, callback) => callback() // run the load callback
-          this.result = "data:image/png;base64,undefined"
-        })
+        vi.spyOn(global, "FileReader").mockImplementation(() => ({
+          readAsDataURL: vi.fn(),
+          addEventListener: (_load, callback) => callback(), // run the load callback
+          result: "data:image/png;base64,undefined"
+        }))
 
         renderComponent(
           new File(["a".repeat(100)], "foo.png", { type: "image/png" })
@@ -187,13 +202,15 @@ describe("alchemy-file-upload", () => {
 
     describe("onload - file was uploaded", () => {
       describe("successful server response", () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           const xhrMock = mockXMLHttpRequest(200, {
             message: "Foo Bar"
           })
           renderComponent(testFile, xhrMock)
           component.request.open("post", "/admin/pictures")
           component.request.send()
+          // Wait for the async onload to be called
+          await new Promise((resolve) => setTimeout(resolve, 1))
         })
 
         it("should call the growl method", () => {
@@ -212,13 +229,15 @@ describe("alchemy-file-upload", () => {
 
       describe("failed server response", () => {
         describe("with a JSON response", () => {
-          beforeEach(() => {
+          beforeEach(async () => {
             const xhrMock = mockXMLHttpRequest(400, {
               message: "Error: Foo Bar"
             })
             renderComponent(testFile, xhrMock)
             component.request.open("post", "/admin/pictures")
             component.request.send()
+            // Wait for the async onload to be called
+            await new Promise((resolve) => setTimeout(resolve, 1))
           })
 
           it("should call the growl method", () => {
@@ -236,7 +255,7 @@ describe("alchemy-file-upload", () => {
         })
 
         describe("without a JSON response", () => {
-          beforeEach(() => {
+          beforeEach(async () => {
             const xhrMock = mockXMLHttpRequest(
               502,
               "<h1>Error</h1><p>Foo Bar</p>",
@@ -245,6 +264,8 @@ describe("alchemy-file-upload", () => {
             renderComponent(testFile, xhrMock)
             component.request.open("post", "/admin/pictures")
             component.request.send()
+            // Wait for the async onload to be called
+            await new Promise((resolve) => setTimeout(resolve, 1))
           })
 
           it("should call the growl method", () => {
@@ -373,7 +394,7 @@ describe("alchemy-file-upload", () => {
       // suppress missing translation warnings
       global.console = {
         ...console,
-        warn: jest.fn()
+        warn: vi.fn()
       }
     })
 

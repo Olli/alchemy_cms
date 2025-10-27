@@ -143,7 +143,7 @@ module Alchemy
 
     describe "#page_layout_names" do
       before do
-        Alchemy::PageLayout.instance_variable_set(:@definitions, nil)
+        Alchemy::PageDefinition.instance_variable_set(:@definitions, nil)
       end
 
       context "if site has a layout definition file" do
@@ -170,7 +170,7 @@ module Alchemy
 
         it "returns all non 'layoutpage' page layout names" do
           allow(Site).to receive(:definitions).and_return([])
-          expect(site.page_layout_names).to eq(%w[index readonly standard everything news contact erb_layout])
+          expect(site.page_layout_names).to eq(%w[index readonly standard everything news search contact erb_layout])
         end
 
         context "when layoutpages are requested" do
@@ -184,7 +184,7 @@ module Alchemy
 
     describe "#page_layout_definitions" do
       before do
-        Alchemy::PageLayout.instance_variable_set(:@definitions, nil)
+        Alchemy::PageDefinition.instance_variable_set(:@definitions, nil)
       end
 
       context "if site has a layout definition file" do
@@ -193,24 +193,7 @@ module Alchemy
 
         it "returns page layouts defined" do
           allow(Site).to receive(:definitions).and_return(definitions)
-          expect(site.page_layout_definitions).to eq(
-            [
-              {
-                "name" => "standard",
-                "autogenerate" => [
-                  "header",
-                  "article",
-                  "download"
-                ],
-                "elements" => [
-                  "article",
-                  "header",
-                  "slider",
-                  "download"
-                ]
-              }
-            ]
-          )
+          expect(site.page_layout_definitions.map(&:name)).to match_array(["standard"])
         end
       end
 
@@ -219,107 +202,17 @@ module Alchemy
 
         it "returns all page layout definitions" do
           allow(Site).to receive(:definitions).and_return([])
-          expect(site.page_layout_definitions).to eq(
-            [
-              {
-                "name" => "index",
-                "unique" => true,
-                "elements" => [
-                  "all_you_can_eat"
-                ],
-                "autogenerate" => [
-                  "all_you_can_eat"
-                ]
-              },
-              {
-                "name" => "readonly",
-                "fixed_attributes" => {
-                  "meta_description" => nil,
-                  "meta_keywords" => nil,
-                  "name" => false,
-                  "public_on" => nil,
-                  "public_until" => nil,
-                  "restricted" => false,
-                  "robot_follow" => false,
-                  "robot_index" => false,
-                  "title" => false,
-                  "urlname" => false
-                }
-              },
-              {
-                "name" => "standard",
-                "autogenerate" => [
-                  "header",
-                  "article",
-                  "download"
-                ],
-                "elements" => [
-                  "article",
-                  "header",
-                  "slider",
-                  "download"
-                ]
-              },
-              {
-                "name" => "everything",
-                "autogenerate" => [
-                  "all_you_can_eat",
-                  "right_column",
-                  "left_column"
-                ],
-                "elements" => [
-                  "text",
-                  "all_you_can_eat",
-                  "gallery",
-                  "right_column",
-                  "left_column",
-                  "old",
-                  "article",
-                  "element_with_ingredient_groups",
-                  "tinymce_custom"
-                ],
-                "hint" => true
-              },
-              {
-                "name" => "news",
-                "autogenerate" => [
-                  "news"
-                ],
-                "elements" => [
-                  "headline",
-                  "news"
-                ],
-                "insert_elements_at" => "top",
-                "unique" => true
-              },
-              {
-                "name" => "contact",
-                "unique" => true,
-                "autogenerate" => [
-                  "headline",
-                  "text",
-                  "contactform"
-                ],
-                "cache" => false,
-                "elements" => [
-                  "headline",
-                  "text",
-                  "contactform"
-                ]
-              },
-              {
-                "name" => "footer",
-                "elements" => [
-                  "menu"
-                ],
-                "layoutpage" => true
-              },
-              {
-                "name" => "erb_layout",
-                "unique" => true
-              }
-            ]
-          )
+          expect(site.page_layout_definitions.map(&:name)).to match_array([
+            "index",
+            "readonly",
+            "standard",
+            "everything",
+            "news",
+            "contact",
+            "footer",
+            "erb_layout",
+            "search"
+          ])
         end
       end
     end
@@ -352,7 +245,7 @@ module Alchemy
       context "without languages" do
         it "works" do
           subject
-          expect(site.errors[:languages]).to be_empty
+          expect(site.errors[:base]).to be_empty
         end
       end
 
@@ -361,7 +254,7 @@ module Alchemy
 
         it "must not work" do
           subject
-          expect(site.errors[:languages]).to_not be_empty
+          expect(site.errors[:base]).to include("There are still languages attached to this site. Please remove them first.")
         end
       end
     end

@@ -35,7 +35,7 @@ RSpec.describe "Resources", type: :system do
       end
 
       it "should limit the number of items per page based on alchemy's general configuration" do
-        stub_alchemy_config(:items_per_page, 5)
+        stub_alchemy_config(items_per_page: 5)
 
         visit "/admin/events"
         expect(page).to have_selector("div#archive_all table.list tbody tr", count: 5)
@@ -54,7 +54,7 @@ RSpec.describe "Resources", type: :system do
     describe "filters" do
       let(:filter_count) { 2 }
 
-      context "resource model has alchemy_resource_filters defined" do
+      context "resource controller has add_alchemy_filter defined" do
         it "should show selectboxes for the filters" do
           visit "/admin/events"
 
@@ -62,6 +62,25 @@ RSpec.describe "Resources", type: :system do
             expect(page).to have_selector("select", count: filter_count)
             expect(page).to have_selector("label", text: "By Timeframe")
             expect(page).to have_selector("label", text: "Location")
+          end
+        end
+
+        context "with pre configured filter value" do
+          before do
+            create(:event, name: "today 1", starts_at: Time.current)
+            create(:event, name: "today 2", starts_at: Time.current)
+            create(:event, name: "yesterday", starts_at: Time.current - 1.day)
+          end
+
+          it "only shows the selected resources and shows selected filter" do
+            visit "/admin/events"
+
+            within "div#archive_all table.list tbody" do
+              expect(page).to have_selector("tr", count: 2)
+              expect(page).to have_content("today 1")
+              expect(page).to have_content("today 2")
+              expect(page).to_not have_content("yesterday")
+            end
           end
         end
 
@@ -76,13 +95,6 @@ RSpec.describe "Resources", type: :system do
 
           it "should filter the list to only show matching items", js: true do
             visit "/admin/events"
-
-            within "div#archive_all table.list tbody" do
-              expect(page).to have_selector("tr", count: 3)
-              expect(page).to have_content("today 1")
-              expect(page).to have_content("today 2")
-              expect(page).to have_content("yesterday")
-            end
 
             within "#library_sidebar #filter_bar" do
               select2("Starting today", from: "By Timeframe")
@@ -111,7 +123,7 @@ RSpec.describe "Resources", type: :system do
           end
 
           it "can combine filters and pagination", :js do
-            stub_alchemy_config(:items_per_page, 1)
+            stub_alchemy_config(items_per_page: 1)
 
             visit "/admin/events?q[by_timeframe]=starting_today"
 
@@ -127,7 +139,7 @@ RSpec.describe "Resources", type: :system do
 
           it "can combine ransack queries and pagination", :js do
             allow_any_instance_of(Admin::EventsController).to receive(:permitted_ransack_search_fields).and_return([:name_start])
-            stub_alchemy_config(:items_per_page, 1)
+            stub_alchemy_config(items_per_page: 1)
 
             visit "/admin/events?q[name_start]=today"
 
@@ -146,7 +158,7 @@ RSpec.describe "Resources", type: :system do
               visit "/admin/events"
 
               within "div#archive_all table.list tbody" do
-                expect(page).to have_selector("tr", count: 3)
+                expect(page).to have_selector("tr", count: 2)
               end
 
               within "#library_sidebar #filter_bar" do
@@ -255,6 +267,16 @@ RSpec.describe "Resources", type: :system do
       end
     end
 
+    context "for taggable model" do
+      it "should have a tag select" do
+        visit "/admin/events/new"
+
+        within("form") do
+          expect(page).to have_selector("alchemy-tags-autocomplete")
+        end
+      end
+    end
+
     describe "date fields" do
       it "have date picker" do
         visit "/admin/bookings/new"
@@ -272,6 +294,7 @@ RSpec.describe "Resources", type: :system do
         visit "/admin/events/new"
         fill_in "event_name", with: "My second event"
         fill_in "event_starts_at", with: start_date
+        fill_in "Tag list", with: "wedding"
         select location.name, from: "Location"
         click_on "Save"
       end
@@ -279,6 +302,10 @@ RSpec.describe "Resources", type: :system do
       it "lists the new item" do
         expect(page).to have_content "My second event"
         expect(page).to have_content I18n.l(start_date, format: :"alchemy.default")
+
+        within "#library_sidebar" do
+          expect(page).to have_content "wedding"
+        end
       end
 
       it "shows a success message" do
@@ -366,7 +393,8 @@ RSpec.describe "Resources", type: :system do
         click_link "Matinee"
         expect(page).to have_content("Casablanca")
         expect(page).to_not have_content("Die Hard IX")
-        expect(page).to have_link(nil, href: "/admin/events/#{event.id}/edit?tagged_with=Matinee")
+        expect(page).to have_link(nil,
+          href: "/admin/events/#{event.id}/edit?q%5Bby_timeframe%5D=future&tagged_with=Matinee")
       end
     end
   end
@@ -391,7 +419,7 @@ RSpec.describe "Resources", type: :system do
 
       visit "/admin/events?q[by_timeframe]=future"
       expect(page).to have_content("Hovercar Expo")
-      expect(page).to_not have_content("Car Expo")
+      expect(page).to have_content("Car Expo")
       expect(page).to_not have_content("Horse Expo")
 
       # Keep the filter when editing an event
@@ -410,7 +438,7 @@ RSpec.describe "Resources", type: :system do
         visit "/admin/events?q[by_timeframe]=future"
 
         expect(page).to have_content("Hovercar Expo")
-        expect(page).to_not have_content("Car Expo")
+        expect(page).to have_content("Car Expo")
         expect(page).to_not have_content("Horse Expo")
 
         page.find(".search_input_field").set("Horse")
@@ -420,6 +448,39 @@ RSpec.describe "Resources", type: :system do
         expect(page).to_not have_content("Car Expo")
         expect(page).to_not have_content("Horse Expo")
       end
+    end
+  end
+
+  context "Editing resources with filters present" do
+    let(:office) { create(:location, name: "Office") }
+    let(:showroom) { create(:location, name: "Showroom") }
+    let!(:event_1) { create(:event, name: "Meeting 1", location: office) }
+    let!(:event_2) { create(:event, name: "Meeting 2", location: showroom) }
+    let!(:event_3) { create(:event, name: "Karaoke", location: office) }
+
+    it "allows filtering the view and keeping filters while editing" do
+      visit admin_events_path(params: {
+        q: {
+          by_location_id: office.id,
+          name_or_hidden_name_or_description_or_location_name_cont: "Meeting"
+        }
+      })
+      expect(page).to have_selector(".search_field input[value='Meeting']")
+
+      expect(page).to have_content("Meeting 1")
+      expect(page).not_to have_content("Meeting 2")
+      expect(page).not_to have_content("Karaoke")
+
+      # Edit an event
+      within("tr", text: "Meeting 1") do
+        click_link_with_tooltip("Edit")
+      end
+      fill_in "Name", with: "Updated Meeting 1"
+      click_button "Save"
+
+      expect(page).to have_content("Updated Meeting 1")
+      expect(page).not_to have_content("Meeting 2")
+      expect(page).not_to have_content("Karaoke")
     end
   end
 end

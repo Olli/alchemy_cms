@@ -34,4 +34,25 @@ RSpec.describe Alchemy::Engine do
       end
     end
   end
+
+  describe "alchemy.importmap" do
+    let(:additional_importmap) do
+      Alchemy::Configurations::Importmap.new(
+        importmap_path: Rails.root.join("config/importmap.rb"),
+        name: "additional_importmap",
+        source_paths: [Rails.root.join("app/javascript")]
+      )
+    end
+
+    before do
+      stub_alchemy_config(admin_importmaps: [additional_importmap])
+    end
+
+    it "adds additional importmap to admin imports" do
+      initializer = Alchemy::Engine.initializers.find { _1.name == "alchemy.importmap" }
+      expect(Alchemy.config.admin_js_imports).to receive(:add).with("additional_importmap")
+      prepare_blocks = initializer.run(Rails.application)
+      prepare_blocks.last.call
+    end
+  end
 end

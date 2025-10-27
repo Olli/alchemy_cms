@@ -11,8 +11,7 @@ module Alchemy
       add_alchemy_filter :recent, type: :checkbox
       add_alchemy_filter :last_upload, type: :checkbox
       add_alchemy_filter :without_tag, type: :checkbox
-
-      helper "alchemy/admin/tags"
+      add_alchemy_filter :deletable, type: :checkbox
 
       before_action(only: :assign) do
         @attachment = Attachment.find(params[:id])
@@ -38,6 +37,7 @@ module Alchemy
 
       # The resources controller renders the edit form as default for show actions.
       def show
+        @assignments = @attachment.related_ingredients.joins(element: :page)
         render :show
       end
 
@@ -60,18 +60,9 @@ module Alchemy
       end
 
       def destroy
-        name = @attachment.name
         @attachment.destroy
-        @url = admin_attachments_url(search_filter_params)
-        flash[:notice] = Alchemy.t("File deleted successfully", name: name)
-      end
-
-      def download
-        @attachment = Attachment.find(params[:id])
-        send_file @attachment.file.path, {
-          filename: @attachment.file_name,
-          type: @attachment.file_mime_type
-        }
+        flash[:notice] = Alchemy.t("File deleted successfully", name: @attachment.name)
+        redirect_to alchemy.admin_attachments_path(**search_filter_params)
       end
 
       private

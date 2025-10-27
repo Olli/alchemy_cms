@@ -65,7 +65,7 @@ describe Alchemy::Admin::LanguagesController do
       it "has default language's page_layout set" do
         get :new
         expect(assigns(:language).page_layout)
-          .to eq(Alchemy.config.get(:default_language)["page_layout"])
+          .to eq(Alchemy.config.default_language.page_layout)
       end
     end
   end
@@ -108,7 +108,18 @@ describe Alchemy::Admin::LanguagesController do
         delete :destroy, params: {id: language.id}
         expect(response).to redirect_to admin_languages_path
         expect(flash[:warning]).to \
-          eq("Pages are still attached to this language. Please remove them first.")
+          eq("There are still pages attached to this language. Please remove them first.")
+      end
+    end
+
+    context "with nodes attached" do
+      let!(:node) { create(:alchemy_node, language: language) }
+
+      it "returns with error message" do
+        delete :destroy, params: {id: language.id}
+        expect(response).to redirect_to admin_languages_path
+        expect(flash[:warning]).to \
+          eq("There are still menu nodes attached to this language. Please remove them first.")
       end
     end
 

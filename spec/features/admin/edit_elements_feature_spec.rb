@@ -20,7 +20,7 @@ RSpec.describe "The edit elements feature", type: :system do
     context "with a page_version_id passed" do
       scenario "a form to select a new element for the page appears." do
         visit alchemy.new_admin_element_path(page_version_id: a_page.draft_version.id)
-        expect(page).to have_selector('select[name="element[name]"]')
+        expect(page).to have_selector('alchemy-element-select input[name="element[name]"]')
       end
     end
 
@@ -64,7 +64,10 @@ RSpec.describe "The edit elements feature", type: :system do
       before do
         allow_any_instance_of(Alchemy::Admin::ElementsController).to receive(:get_clipboard) do
           [
-            {"id" => create(:alchemy_element, name: element.definition["nestable_elements"].first).id, "action" => "copy"}
+            {
+              "id" => create(:alchemy_element, name: element.definition.nestable_elements.first).id,
+              "action" => "copy"
+            }
           ]
         end
       end
@@ -98,7 +101,8 @@ RSpec.describe "The edit elements feature", type: :system do
           page.find(".add-nestable-element-button").click
           new_element = Alchemy::Element.last
           page.find("#element_#{new_element.id} .element-header").hover
-          page.first("a[href^='/admin/clipboard/insert?remarkable_id=#{new_element.id}&remarkable_type=elements']").click
+          page.first("form[action^='/admin/clipboard/insert?remarkable_id=#{new_element.id}&remarkable_type=elements'] button").click
+          expect(page).to have_content("Copied Slide: to clipboard")
         end
 
         scenario "the add button now opens add element form with the clipboard tab" do
@@ -128,7 +132,7 @@ RSpec.describe "The edit elements feature", type: :system do
       button.click
       expect(page).to have_css(".alchemy-dialog")
       within ".alchemy-dialog" do
-        expect(page).to have_select("Element")
+        expect(page).to have_field("Element")
         select2("Text", from: "Element")
         click_button("Add")
       end

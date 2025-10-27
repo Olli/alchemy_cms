@@ -4,6 +4,7 @@ module Alchemy
   module Admin
     module ResourceFilter
       extend ActiveSupport::Concern
+
       COMMON_SEARCH_FILTER_EXCLUDES = %i[id utf8 _method _ format].freeze
 
       included do
@@ -81,10 +82,10 @@ module Alchemy
       end
 
       def applied_filters
-        return [] unless params[:q]
+        return [] unless search_filter_params[:q]
 
         alchemy_filters.select do |alchemy_filter|
-          params[:q][alchemy_filter.name].present?
+          search_filter_params[:q][alchemy_filter.name].present?
         end
       end
     end

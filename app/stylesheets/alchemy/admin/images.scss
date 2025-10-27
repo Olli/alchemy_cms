@@ -1,10 +1,12 @@
-@use "../variables" as vars;
+alchemy-picture-thumbnail {
+  &[loading] {
+    img {
+      opacity: 0;
+    }
+  }
 
-img {
-  opacity: 1;
-  transition: opacity vars.$transition-duration;
-
-  &.loading {
-    opacity: 0;
+  img {
+    opacity: 1;
+    transition: opacity var(--transition-duration);
   }
 }

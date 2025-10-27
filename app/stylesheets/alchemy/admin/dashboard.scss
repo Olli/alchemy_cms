@@ -1,5 +1,3 @@
-@use "../variables" as vars;
-
 #dashboard {
   overflow: auto;
   padding: var(--spacing-4) 0;
@@ -49,16 +47,26 @@
   }
 }
 
-#update_check {
+.logo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5em;
+
+  svg {
+    width: 200px;
+    height: auto;
+  }
+}
+
+alchemy-update-check {
+  display: flex;
   position: relative;
   height: 16px;
   margin-bottom: 2em;
-
-  img#load_info {
-    width: 16px;
-    height: 16px;
-    display: none;
-  }
+  text-align: center;
+  justify-content: center;
 
   > span {
     display: inline-flex;
@@ -72,18 +80,18 @@
     .icon {
       fill: currentColor;
     }
-  }
 
-  #up_to_date {
-    color: vars.$success_text_color;
-  }
+    &.up_to_date {
+      color: var(--notice-success-text-color);
+    }
 
-  #error {
-    color: vars.$error_text_color;
-  }
+    &.error {
+      color: var(--notice-error-text-color);
+    }
 
-  #update_available {
-    color: vars.$warning_text_color;
+    &.update_available {
+      color: var(--notice-warning-text-color);
+    }
   }
 }
 

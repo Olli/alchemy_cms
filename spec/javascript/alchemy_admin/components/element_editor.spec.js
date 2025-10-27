@@ -1,4 +1,4 @@
-import ImageLoader from "alchemy_admin/image_loader"
+import { vi } from "vitest"
 import fileEditors from "alchemy_admin/file_editors"
 import pictureEditors from "alchemy_admin/picture_editors"
 import IngredientAnchorLink from "alchemy_admin/ingredient_anchor_link"
@@ -6,43 +6,43 @@ import { ElementEditor } from "alchemy_admin/components/element_editor"
 import { renderComponent } from "./component.helper"
 import { growl } from "alchemy_admin/growler"
 
-jest.mock("alchemy_admin/growler", () => {
+vi.mock("alchemy_admin/growler", () => {
   return {
-    growl: jest.fn()
+    growl: vi.fn()
   }
 })
 
-jest.mock("alchemy_admin/image_loader", () => {
+vi.mock("alchemy_admin/image_loader", () => {
   return {
     __esModule: true,
     default: {
-      init: jest.fn()
+      init: vi.fn()
     }
   }
 })
 
-jest.mock("alchemy_admin/file_editors", () => {
+vi.mock("alchemy_admin/file_editors", () => {
   return {
     __esModule: true,
-    default: jest.fn()
+    default: vi.fn()
   }
 })
 
-jest.mock("alchemy_admin/picture_editors", () => {
+vi.mock("alchemy_admin/picture_editors", () => {
   return {
     __esModule: true,
-    default: jest.fn()
+    default: vi.fn()
   }
 })
 
-jest.mock("alchemy_admin/ingredient_anchor_link", () => {
+vi.mock("alchemy_admin/ingredient_anchor_link", () => {
   return {
     __esModule: true,
-    default: { updateIcon: jest.fn() }
+    default: { updateIcon: vi.fn() }
   }
 })
 
-jest.mock("alchemy_admin/utils/ajax", () => {
+vi.mock("alchemy_admin/utils/ajax", () => {
   return {
     __esModule: true,
     post(url) {
@@ -113,13 +113,13 @@ describe("alchemy-element-editor", () => {
   beforeEach(() => {
     editor = getComponent(html)
     Alchemy = {
-      Spinner: jest.fn(() => {
+      Spinner: vi.fn(() => {
         return {
-          spin: jest.fn(),
-          stop: jest.fn()
+          spin: vi.fn(),
+          stop: vi.fn()
         }
       }),
-      growl: jest.fn(),
+      growl: vi.fn(),
       routes: {
         collapse_admin_element_path(id) {
           return `/admin/elements/${id}/collapse`
@@ -129,8 +129,8 @@ describe("alchemy-element-editor", () => {
         }
       },
       PreviewWindow: {
-        postMessage: jest.fn(),
-        refresh: jest.fn()
+        postMessage: vi.fn(),
+        refresh: vi.fn()
       }
     }
     Alchemy.PreviewWindow.postMessage.mockClear()
@@ -140,7 +140,6 @@ describe("alchemy-element-editor", () => {
 
   describe("connectedCallback", () => {
     beforeEach(() => {
-      ImageLoader.init.mockClear()
       fileEditors.mockClear()
       pictureEditors.mockClear()
     })
@@ -151,13 +150,11 @@ describe("alchemy-element-editor", () => {
           <alchemy-element-editor id="element_123" class="ui-sortable-placeholder"></alchemy-element-editor>
         `
         getComponent(html)
-        expect(ImageLoader.init).not.toHaveBeenCalled()
       })
     })
 
     it("initializes image loader", () => {
       getComponent(html)
-      expect(ImageLoader.init).toHaveBeenCalled()
     })
 
     it("initializes file editors", () => {
@@ -185,8 +182,8 @@ describe("alchemy-element-editor", () => {
 
     it("focuses element in preview", () => {
       const click = new Event("click", { bubbles: true })
-      const postMessage = jest.fn()
-      jest.spyOn(editor, "previewWindow", "get").mockImplementation(() => {
+      const postMessage = vi.fn()
+      vi.spyOn(editor, "previewWindow", "get").mockImplementation(() => {
         return {
           postMessage
         }
@@ -203,7 +200,7 @@ describe("alchemy-element-editor", () => {
     it("toggles element", () => {
       const dblclick = new Event("dblclick", { bubbles: true })
       const originalToggle = ElementEditor.prototype.toggle
-      ElementEditor.prototype.toggle = jest.fn()
+      ElementEditor.prototype.toggle = vi.fn()
       editor.header.dispatchEvent(dblclick)
       expect(ElementEditor.prototype.toggle).toHaveBeenCalled()
       ElementEditor.prototype.toggle = originalToggle
@@ -214,7 +211,7 @@ describe("alchemy-element-editor", () => {
     it("toggles element", () => {
       const click = new Event("click", { bubbles: true })
       const originalToggle = ElementEditor.prototype.toggle
-      ElementEditor.prototype.toggle = jest.fn()
+      ElementEditor.prototype.toggle = vi.fn()
       editor.toggleButton.dispatchEvent(click)
       expect(ElementEditor.prototype.toggle).toHaveBeenCalled()
       ElementEditor.prototype.toggle = originalToggle
@@ -369,7 +366,7 @@ describe("alchemy-element-editor", () => {
           </sl-tab-group>
         `)
         const originalSelectTab = ElementEditor.prototype.selectTabForElement
-        ElementEditor.prototype.selectTabForElement = jest.fn()
+        ElementEditor.prototype.selectTabForElement = vi.fn()
         await editor.focusElement()
         expect(ElementEditor.prototype.selectTabForElement).toHaveBeenCalled()
         ElementEditor.prototype.selectTabForElement = originalSelectTab
@@ -382,7 +379,7 @@ describe("alchemy-element-editor", () => {
           <alchemy-element-editor id="element_123" class="folded"></alchemy-element-editor>
         `)
         const originalExpand = ElementEditor.prototype.expand
-        ElementEditor.prototype.expand = jest.fn()
+        ElementEditor.prototype.expand = vi.fn()
         await editor.focusElement()
         expect(ElementEditor.prototype.expand).toHaveBeenCalled()
         ElementEditor.prototype.expand = originalExpand
@@ -391,7 +388,7 @@ describe("alchemy-element-editor", () => {
 
     it("marks element as selected", async () => {
       const originalSelect = ElementEditor.prototype.selectElement
-      ElementEditor.prototype.selectElement = jest.fn()
+      ElementEditor.prototype.selectElement = vi.fn()
       await editor.focusElement()
       expect(ElementEditor.prototype.selectElement).toHaveBeenCalledWith(true)
       ElementEditor.prototype.selectElement = originalSelect
@@ -510,7 +507,7 @@ describe("alchemy-element-editor", () => {
 
   describe("scrollToElement", () => {
     it("scrolls to element", () => {
-      ElementEditor.prototype.scrollIntoView = jest.fn()
+      ElementEditor.prototype.scrollIntoView = vi.fn()
       editor.scrollToElement()
 
       return new Promise((resolve) => {
@@ -547,7 +544,7 @@ describe("alchemy-element-editor", () => {
 
     describe("with scroll enabled", () => {
       it("scrolls to element", () => {
-        const scrollSpy = jest.spyOn(editor, "scrollToElement")
+        const scrollSpy = vi.spyOn(editor, "scrollToElement")
         editor.selectElement(true)
         expect(scrollSpy).toHaveBeenCalled()
       })
@@ -576,7 +573,7 @@ describe("alchemy-element-editor", () => {
           </sl-tab-group>
         `)
         const tabgroup = document.querySelector("sl-tab-group")
-        tabgroup.show = jest.fn()
+        tabgroup.show = vi.fn()
         await editor.selectTabForElement().then(() => {
           expect(tabgroup.show).toHaveBeenCalledWith("main-content-elements")
         })
@@ -621,7 +618,9 @@ describe("alchemy-element-editor", () => {
           <alchemy-element-editor id="element_123" class="expanded">
             <form class="element-body">
               <div class="element-ingredient-editors">
-                <input type="text">
+                <div class="ingredient-editor">
+                  <input type="text">
+                </div>
               </div>
             </form>
             <div class="nested-elements"></div>
@@ -637,6 +636,12 @@ describe("alchemy-element-editor", () => {
       it("sets beforeunload", () => {
         editor.setDirty()
         expect(window.onbeforeunload).toBeInstanceOf(Function)
+      })
+
+      it("sets ingredient editor dirty", () => {
+        const ingredientEditor = editor.querySelector(".ingredient-editor")
+        editor.setDirty(ingredientEditor)
+        expect(ingredientEditor.classList).toContain("dirty")
       })
     })
   })
@@ -656,8 +661,8 @@ describe("alchemy-element-editor", () => {
         const editor = getComponent(`
           <alchemy-element-editor id="element_123" class="folded"></alchemy-element-editor>
         `)
-        originalExpand = ElementEditor.prototype.expand
-        ElementEditor.prototype.expand = jest.fn()
+        const originalExpand = ElementEditor.prototype.expand
+        ElementEditor.prototype.expand = vi.fn()
         await editor.toggle()
         expect(editor.expand).toHaveBeenCalled()
         ElementEditor.prototype.expand = originalExpand
@@ -667,8 +672,8 @@ describe("alchemy-element-editor", () => {
     describe("if expanded", () => {
       it("collapses element", async () => {
         const editor = getComponent(html)
-        originalCollapse = ElementEditor.prototype.collapse
-        ElementEditor.prototype.collapse = jest.fn()
+        const originalCollapse = ElementEditor.prototype.collapse
+        ElementEditor.prototype.collapse = vi.fn()
         await editor.toggle()
         expect(editor.collapse).toHaveBeenCalled()
         ElementEditor.prototype.collapse = originalCollapse
@@ -737,7 +742,7 @@ describe("alchemy-element-editor", () => {
         `)
         global.console = {
           ...console,
-          error: jest.fn()
+          error: vi.fn()
         }
         await editor.collapse()
         expect(growl).toHaveBeenCalledWith("Something went wrong!", "error")
@@ -804,7 +809,7 @@ describe("alchemy-element-editor", () => {
         `)
         global.console = {
           ...console,
-          error: jest.fn()
+          error: vi.fn()
         }
         try {
           await editor.expand()

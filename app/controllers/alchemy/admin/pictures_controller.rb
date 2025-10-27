@@ -6,11 +6,10 @@ module Alchemy
       include UploaderResponses
       include ArchiveOverlay
       include CurrentLanguage
-
-      helper "alchemy/admin/tags"
+      include PictureDescriptionsFormHelper
 
       before_action :load_resource,
-        only: [:show, :edit, :update, :url, :destroy]
+        only: [:edit, :update, :url, :destroy]
 
       before_action :set_size, only: [:index, :show, :edit_multiple, :update]
 
@@ -28,9 +27,10 @@ module Alchemy
       add_alchemy_filter :without_tag, type: :checkbox
       add_alchemy_filter :deletable, type: :checkbox
 
+      helper_method :picture_offset
+
       def index
-        @query = Picture.ransack(search_filter_params[:q])
-        @pictures = filtered_pictures.includes(:thumbs)
+        @pictures = filtered_pictures(page: params[:page])
 
         if in_overlay?
           archive_overlay
@@ -38,10 +38,12 @@ module Alchemy
       end
 
       def show
-        @query = Picture.ransack(params[:q])
-        @previous = filtered_pictures.where("name < ?", @picture.name).last
-        @next = filtered_pictures.where("name > ?", @picture.name).first
-        @assignments = @picture.picture_ingredients.joins(element: :page)
+        @pictures = filtered_pictures(page: params[:picture_index], per_page: 1)
+        @picture = @pictures.first
+        @previous = @pictures.prev_page
+        @next = @pictures.next_page
+
+        @assignments = @picture.related_ingredients.joins(element: :page)
         @picture_description = @picture.descriptions.find_or_initialize_by(
           language_id: Alchemy::Current.language.id
         )
@@ -100,32 +102,12 @@ module Alchemy
       end
 
       def delete_multiple
-        if request.delete? && params[:picture_ids].present?
-          pictures = Picture.find(params[:picture_ids])
-          names = []
-          not_deletable = []
-          pictures.each do |picture|
-            if picture.deletable?
-              names << picture.name
-              picture.destroy
-            else
-              not_deletable << picture.name
-            end
-          end
-          if not_deletable.any?
-            flash[:warn] = Alchemy.t(
-              "These pictures could not be deleted, because they were in use",
-              names: not_deletable.to_sentence
-            )
-          else
-            flash[:notice] = Alchemy.t("Pictures deleted successfully", names: names.to_sentence)
-          end
+        if params[:picture_ids].present?
+          params[:picture_ids].each { DeletePictureJob.perform_later(_1) }
+          flash[:notice] = Alchemy.t(:pictures_will_be_deleted_now)
         else
           flash[:warn] = Alchemy.t("Could not delete Pictures")
         end
-      rescue => e
-        flash[:error] = e.message
-      ensure
         redirect_to_index
       end
 
@@ -139,16 +121,21 @@ module Alchemy
         redirect_to_index
       end
 
-      def filtered_pictures
+      def filtered_pictures(page: 1, per_page: items_per_page)
+        @query = Picture.ransack(search_filter_params[:q])
+        @query.sorts = default_sort_order if @query.sorts.empty?
         pictures = @query.result
 
         if params[:tagged_with].present?
           pictures = pictures.tagged_with(params[:tagged_with])
         end
 
-        pictures = pictures.page(params[:page] || 1).per(items_per_page)
+        pictures = pictures.page(page).per(per_page)
+        Alchemy.storage_adapter.preloaded_pictures(pictures)
+      end
 
-        pictures.order(:name)
+      def default_sort_order
+        "created_at desc"
       end
 
       def items_per_page
@@ -163,7 +150,7 @@ module Alchemy
           cookies[:alchemy_pictures_per_page] = params[:per_page] ||
             cookies[:alchemy_pictures_per_page] ||
             pictures_per_page_for_size
-        end
+        end.to_i
       end
 
       def items_per_page_options
@@ -172,6 +159,10 @@ module Alchemy
       end
 
       private
+
+      def picture_offset
+        ((params[:page] || 1).to_i - 1) * items_per_page
+      end
 
       def set_size
         @size = params[:size] || session[:alchemy_pictures_size] || "medium"

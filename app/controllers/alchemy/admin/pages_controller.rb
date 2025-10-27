@@ -37,7 +37,12 @@ module Alchemy
         if: :run_on_page_layout_callbacks?,
         only: [:show]
 
-      add_alchemy_filter :by_page_layout, type: :select, options: PageLayout.all.map { |p| [Alchemy.t(p["name"], scope: "page_layout_names"), p["name"]] }
+      add_alchemy_filter :by_page_layout, type: :select, options: ->(_q) do
+        PageDefinition.all.map { |p| [Alchemy.t(p[:name], scope: "page_layout_names"), p[:name]] }
+      end
+
+      add_alchemy_filter :updated_at_gteq, type: :datepicker
+      add_alchemy_filter :updated_at_lteq, type: :datepicker
       add_alchemy_filter :published, type: :checkbox
       add_alchemy_filter :not_public, type: :checkbox
       add_alchemy_filter :restricted, type: :checkbox
@@ -67,10 +72,12 @@ module Alchemy
       # Used by page preview iframe in Page#edit view.
       #
       def show
+        authorize! :edit_content, @page
+
         Current.preview_page = @page
         # Setting the locale to pages language, so the page content has it's correct translations.
         ::I18n.locale = @page.language.locale
-        render(layout: Alchemy.config.get(:admin_page_preview_layout) || "application")
+        render(layout: Alchemy.config.admin_page_preview_layout || "application")
       end
 
       def info
@@ -107,7 +114,7 @@ module Alchemy
         elsif page_needs_lock?
           @page.lock_to!(current_alchemy_user)
         end
-        @preview_urls = Alchemy.preview_sources.map do |klass|
+        @preview_urls = Alchemy.config.preview_sources.map do |klass|
           [
             klass.model_name.human,
             klass.new(routes: Alchemy::Engine.routes).url_for(@page)
@@ -156,16 +163,10 @@ module Alchemy
           flash[:warning] = @page.errors.full_messages.to_sentence
         end
 
-        respond_to do |format|
-          format.js do
-            @redirect_url = if @page.layoutpage?
-              alchemy.admin_layoutpages_path
-            else
-              alchemy.admin_pages_path
-            end
-
-            render :redirect
-          end
+        if @page.layoutpage?
+          redirect_to alchemy.admin_layoutpages_path
+        else
+          redirect_to alchemy.admin_pages_path
         end
       end
 
@@ -219,7 +220,7 @@ module Alchemy
         # but not set to public true, because the cache_key for an element is +published_at+
         # and we don't want the layout pages to be present in +Page.published+ scope.
         @current_language.pages.flushable_layoutpages.update_all(published_at: Time.current)
-        respond_to { |format| format.js }
+        respond_to { |format| format.turbo_stream }
       end
 
       private
